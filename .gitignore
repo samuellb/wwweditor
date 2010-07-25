@@ -1,0 +1,7 @@
+*.o
+*~
+*#
+wwwproject
+domnotify.c
+test
+
