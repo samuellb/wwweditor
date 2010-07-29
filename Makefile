@@ -14,14 +14,28 @@ domnotify.c: domnotify.js
 	echo ";" >> $@.tmp
 	mv -f $@.tmp $@
 
-OBJECTS := domnotify.o main.o webview_common.o webview_webkit.o
+OBJECTS := domnotify.o main.o template.o tokenizer.o webview_common.o webview_webkit.o
 
 main.o: webview.h
+template.o: template.h tokenizer.h
+tokenizer.o: tokenizer.h
 webview_common.o: webview.h webview_private.h
 webview_webkit.o: webview.h webview_private.h
 
 wwwproject: $(OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS) -o $@
+
+
+# Useful commands
+html5enum:
+	sort html5tags.txt | sed -r 's/(.*)/Tag_\1, /' | tr -d '\n\r' | fmt
+
+html5strings:
+	sort html5tags.txt | sed -r 's/(.*)/"\1", /' | tr -d '\n\r' | fmt
+
+html5comments:
+	sort html5tags.txt | sed -r 's/(.*)/\/\/ <\1>/'
+
 
 
 .PHONY: all clean install uninstall
