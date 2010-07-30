@@ -34,14 +34,14 @@ var i = 0;
 function cursorMoved(e) {
     var curNode = window.getSelection().anchorNode;
     
-    // Ignore repeated events
-    if (curNode == lastNode) return;
-    lastNode = curNode;
-    
     // Find the containing element
     while (curNode != null && curNode.nodeType != Node.ELEMENT_NODE) {
         curNode = curNode.parentNode;
     }
+    
+    // Ignore repeated events
+    if (curNode == lastNode) return;
+    lastNode = curNode;
     
     if (curNode == null) {
         window.status = "";
