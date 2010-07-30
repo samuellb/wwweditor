@@ -28,11 +28,43 @@ function emptyIfNull(s) { return (s != null ? s : ""); }
 // Remove event handlers
 // TODO
 
+// Make marked sections editable
+// TODO should work differently for template documents
+function makeMarkedEditable(obj) {
+    var inBeginning = true;
+    for (var node = obj.firstChild; node != null; node = node.nextSibling) {
+        // Skip empty text nodes
+        if (node.nodeType == Node.TEXT_NODE && node.nodeValue.search(/^\s*$/) == 0)
+            continue;
+        
+        // Look for special comments in the beginning
+        if (node.nodeType == Node.COMMENT_NODE && inBeginning) {
+            if (node.nodeValue.search(/^\s*@\s*/) == 0) {
+                node.parentNode.contentEditable = true;
+            }
+        }
+        inBeginning = false;
+        
+        // Process recursively
+        makeMarkedEditable(node);
+    }
+}
+
+makeMarkedEditable(document.documentElement);
+
+
 // Cursor move detection
 var lastNode = null;
 var i = 0;
 function cursorMoved(e) {
     var curNode = window.getSelection().anchorNode;
+    
+    // Only show options for editable nodes
+    var editNode = curNode;
+    while (editNode != null && (!editNode.contentEditable || editNode.contentEditable == "false")) {
+        editNode = editNode.parentNode;
+    }
+    if (editNode == null) curNode = null;
     
     // Find the containing element
     while (curNode != null && curNode.nodeType != Node.ELEMENT_NODE) {

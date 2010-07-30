@@ -77,7 +77,6 @@ WebView *webview_new(WebViewNotifyFunction notifyFunction) {
     
     // Create an editable WebKit view
     GtkWidget *widget = webkit_web_view_new();
-    webkit_web_view_set_editable(WEBKIT_WEB_VIEW(widget), TRUE);
     webview->widget = widget;
     webview->link_blocker = 0;
     
