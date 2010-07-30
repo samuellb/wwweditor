@@ -8,13 +8,13 @@ LIBS += `pkg-config --libs 'gtk+-2.0 >= 2.16' webkit-1.0`
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@
 
-domnotify.c: domnotify.js
-	echo "const char *domnotify_js = " > $@.tmp
-	(yui-compressor --charset UTF-8 domnotify.js || cat domnotify.js) | sed -E 's/(["\\])/\\\1/g' | sed -E 's/(.*)/"\1\\n"/' >> $@.tmp
+editor_js.c: editor.js
+	echo "const char *editor_js = " > $@.tmp
+	(yui-compressor --charset UTF-8 editor.js || cat editor.js) | sed -E 's/(["\\])/\\\1/g' | sed -E 's/(.*)/"\1\\n"/' >> $@.tmp
 	echo ";" >> $@.tmp
 	mv -f $@.tmp $@
 
-OBJECTS := domnotify.o main.o template.o tokenizer.o webview_common.o webview_webkit.o
+OBJECTS := editor_js.o main.o template.o tokenizer.o webview_common.o webview_webkit.o
 
 main.o: webview.h
 template.o: template.h tokenizer.h
@@ -40,6 +40,6 @@ html5comments:
 
 .PHONY: all clean install uninstall
 clean:
-	rm -f $(OBJECTS) domnotify.c wwwproject
+	rm -f $(OBJECTS) editor_js.c wwwproject
 
 

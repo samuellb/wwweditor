@@ -34,7 +34,7 @@ struct WebView_ {
 };
 
 
-extern const char *domnotify_js;
+extern const char *editor_js;
 
 /**
  * Triggered when the document load status changes. Used to detect when the
@@ -51,7 +51,7 @@ static void load_status_notify(GObject *gobject, GParamSpec *pspec, gpointer use
     
     // Install notification script
     g_object_set(settings, "enable-scripts", TRUE,  NULL);
-    webview_executeScript(webview, domnotify_js);
+    webview_executeScript(webview, editor_js);
 }
 
 
