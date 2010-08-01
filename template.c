@@ -33,8 +33,10 @@ typedef struct {
     const gchar *name;
     size_t nameLength;
     
-    const gchar *element;
-    size_t elementLength;
+    const gchar *startTag;
+    
+    const gchar *content;
+    size_t contentLength;
 } Marker;
 
 struct Template_ {
@@ -306,15 +308,29 @@ static const gchar *getSpecialComment(const Token *token,
     
     // Read name
     const gchar *end = start;
-    while (*end && end[0] != '-' && end[1] != '-') end++;
+    while (*end && (end[0] != '-' || end[1] != '-')) end++;
     if (!*end) return NULL;
     
     // Remove trailing spaces
     end--;
     while (g_ascii_isspace(*end)) end--;
     
-    *length = end - start;
+    *length = end - start + 1;
     return start;
+}
+
+
+static Marker *addMarker(Template *tem) {
+    tem->markers = realloc(tem->markers, ++tem->markerCount * sizeof(Marker));
+    return &tem->markers[tem->markerCount-1];
+}
+
+
+static gboolean isTagClosed(ParserState *state, Marker *marker) {
+    for (size_t l = state->level; l-- > 0; ) {
+        if (state->openTags[l].data == marker->startTag) return FALSE;
+    }
+    return TRUE;
 }
 
 
@@ -336,6 +352,9 @@ Template *template_parseFromString(const gchar *templateHTML) {
     ParserState state = { 0, NULL, 0, 0 };
     Token token;
     const gchar *html = templateHTML;
+    const gchar *prevTokenEnd = html;
+    const gchar *prevTagEnd = NULL;
+    Marker *marker = NULL;
     
     while (parse(&html, &token, &state)) {
         fprintf(stderr, "got token: (%d:%d) [%s%s]\n", token.type, token.tag,
@@ -349,12 +368,32 @@ Template *template_parseFromString(const gchar *templateHTML) {
             printf("    %d {%.*s}\n", token.type, token.dataLength, token.data);
         }
         
+        if (!marker) {
+            // Look for <!--@section--> comments
+            size_t nameLength;
+            const gchar *name = getSpecialComment(&token, &state, &nameLength);
+            if (name) {
+                fprintf(stderr, "found special comment: [%.*s]\n", nameLength, name);
+                
+                // Add marker
+                marker = addMarker(tem);
+                marker->name = name;
+                marker->nameLength = nameLength;
+                marker->startTag = state.openTags[state.level-1].data;
+                marker->content = prevTagEnd;
+                marker->contentLength = 0;
+            }
+        } else if (isTagClosed(&state, marker)) {
+            // Finish the marker
+            marker->contentLength = prevTokenEnd - marker->content;
+            fprintf(stderr, "tag closed! >%.*s<\n", marker->nameLength, marker->name);
+            fprintf(stderr, "contents %.*s\n", marker->contentLength, marker->content);
+            marker = NULL;
+        }
         
-        size_t nameLength;
-        const gchar *name = getSpecialComment(&token, &state, &nameLength);
-        if (name) {
-            // TODO add a marker for the current element
-            fprintf(stderr, "found special comment: [%.*s]\n", nameLength, name);
+        prevTokenEnd = html;
+        if (token.type == Token_StartTag) {
+            prevTagEnd = html;
         }
     }
     
