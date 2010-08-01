@@ -25,7 +25,7 @@
 
 #include <string.h>
 
-#include "tokenizer.h"
+#include "html5_tokenizer.h"
 
 
 // All HTML5 tags as strings. Generated with "make html5enum"
@@ -360,7 +360,7 @@ static gboolean skipAttributes(const gchar **html) {
 }
 
 
-gboolean tokenizer_readTag(const gchar **html, Token *token) {
+gboolean tokenizer_readToken(const gchar **html, Token *token) {
     token->tag = Tag_None;
     token->data = NULL;
     token->dataLength = 0;

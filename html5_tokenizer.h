@@ -22,8 +22,8 @@
 
 */
 
-#ifndef TOKENIZER_H
-#define TOKENIZER_H
+#ifndef HTML5_TOKENIZER_H
+#define HTML5_TOKENIZER_H
 
 #include <glib.h>
 
@@ -98,7 +98,7 @@ typedef struct {
 #define tokenizer_getTagType(token) ((token)->tag != Tag_None ? \
     tokenizer_tagType[(token)->tag] : UnknownTagType)
 
-gboolean tokenizer_readTag(const gchar **html, Token *token);
+gboolean tokenizer_readToken(const gchar **html, Token *token);
 gboolean tokenizer_skipScript(const gchar **html);
 gboolean tokenizer_skipRawText(const gchar **html, const Token *startTag);
 gboolean tokenizer_skipRCData(const gchar **html, const Token *startTag);
