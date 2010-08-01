@@ -244,7 +244,12 @@ static gboolean parse(const gchar **html, Token *token, ParserState *state) {
             
             // Handle <li>, <dd> and <dt> specially
             if (type & TagType_ListItem) {
-                CLOSEONE(token->tag, NULL, TagType_MatchNone, acceptListPhrasing, TRUE);
+                if (token->tag == Tag_li) {
+                    CLOSEONE(Tag_li, NULL, TagType_MatchNone, acceptListPhrasing, TRUE);
+                } else {
+                    CLOSEONE(Tag_dd, NULL, TagType_MatchNone, acceptListPhrasing, TRUE);
+                    CLOSEONE(Tag_dt, NULL, TagType_MatchNone, acceptListPhrasing, TRUE);
+                }
             }
             
             // "Formatting" elements like <b> are not handled here because
