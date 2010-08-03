@@ -157,6 +157,7 @@ Template *template_parseFromString(const gchar *templateHTML) {
 
 
 void template_free(Template *tem) {
+    g_free(tem->markers);
     g_free(tem);
 }
 
