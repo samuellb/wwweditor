@@ -22,7 +22,8 @@
 
 */
 
-#include <stdio.h> // TODO remove (used for debug code)
+#include <stdio.h>
+#include <string.h>
 #include "html5_parser.h"
 
 #include "template.h"
@@ -37,9 +38,14 @@ typedef struct {
     size_t contentLength;
 } Marker;
 
+typedef struct {
+    size_t count;
+    Marker *list;
+} MarkerList;
+
 struct Template_ {
-    size_t markerCount;
-    Marker *markers;
+    const gchar *html;
+    MarkerList markers;
 };
 
 
@@ -75,9 +81,9 @@ static const gchar *getSpecialComment(const Token *token,
 }
 
 
-static Marker *addMarker(Template *tem) {
-    tem->markers = g_realloc(tem->markers, ++tem->markerCount * sizeof(Marker));
-    return &tem->markers[tem->markerCount-1];
+static Marker *addMarker(MarkerList *markers) {
+    markers->list = g_realloc(markers->list, ++markers->count * sizeof(Marker));
+    return &markers->list[markers->count-1];
 }
 
 
@@ -89,24 +95,12 @@ static gboolean isTagClosed(ParserState *state, Marker *marker) {
 }
 
 
-/**
- * Parses a template document. The document can contain any number of
- * editable elements. An element becomes editable if it the start tag is
- * followed by a special comment, for example:
- *
- *     <div>
- *       <!--@Page contents-->
- *       default contents here...
- *     </div>
- */
-Template *template_parseFromString(const gchar *templateHTML) {
-    Template *tem = g_malloc(sizeof(Template));
-    tem->markerCount = 0;
-    tem->markers = NULL;
+static void parseMarkers(MarkerList *markers, const gchar *html) {
+    markers->count = 0;
+    markers->list = NULL;
     
     ParserState state = { 0, NULL, 0, 0 };
     Token token;
-    const gchar *html = templateHTML;
     const gchar *prevTokenEnd = html;
     const gchar *prevTagEnd = NULL;
     Marker *marker = NULL;
@@ -131,7 +125,7 @@ Template *template_parseFromString(const gchar *templateHTML) {
                 fprintf(stderr, "found special comment: [%.*s]\n", nameLength, name);
                 
                 // Add marker
-                marker = addMarker(tem);
+                marker = addMarker(markers);
                 marker->name = name;
                 marker->nameLength = nameLength;
                 marker->startTag = state.openTags[state.level-1].data;
@@ -151,20 +145,89 @@ Template *template_parseFromString(const gchar *templateHTML) {
             prevTagEnd = html;
         }
     }
+}
+
+/**
+ * Parses a template document. The document can contain any number of
+ * editable elements. An element becomes editable if it the start tag is
+ * followed by a special comment, for example:
+ *
+ *     <div>
+ *       <!--@Page contents-->
+ *       default contents here...
+ *     </div>
+ */
+Template *template_parseFromString(const gchar *templateHTML) {
+    Template *tem = g_malloc(sizeof(Template));
+    tem->html = templateHTML;
+    parseMarkers(&tem->markers, templateHTML);
     
     return tem;
 }
 
 
 void template_free(Template *tem) {
-    g_free(tem->markers);
+    g_free(tem->markers.list);
     g_free(tem);
 }
 
 
-gchar *template_updatePage(Template *tem, const gchar *pageHTML) {
-    // TODO
-    return NULL;
+static void append(gchar **destination, size_t *destLength,
+                   const gchar *source, size_t sourceLength) {
+    if (sourceLength == 0) return;
+    gchar *newDest = g_realloc(*destination, *destLength + sourceLength);
+    memcpy(&newDest[*destLength], source, sourceLength);
+    *destination = newDest;
+    *destLength += sourceLength;
+}
+
+
+gchar *template_updatePage(const Template *tem, const gchar *pageHTML) {
+    MarkerList pageMarkers;
+    parseMarkers(&pageMarkers, pageHTML);
+    
+    gchar *output = NULL;
+    size_t outputLength = 0;
+    const gchar *temHTML = tem->html;
+    size_t mi = 0;
+    
+    while (*temHTML) {
+        const Marker *marker = (mi < tem->markers.count ? &tem->markers.list[mi++] : NULL);
+        
+        // Add HTML from template
+        if (marker == NULL) {
+            // Last marker
+            append(&output, &outputLength, temHTML, strlen(temHTML));
+            break;
+        }
+        
+        size_t htmlLength = (marker->content - temHTML);
+        append(&output, &outputLength, temHTML, htmlLength);
+        temHTML += htmlLength + marker->contentLength;
+        
+        // Find marker in page
+        const Marker *pageMarker = NULL;
+        for (size_t p = 0; p < pageMarkers.count; p++) {
+            const Marker *candidate = &pageMarkers.list[p];
+            if (candidate->nameLength == marker->nameLength && 
+                !strncmp(candidate->name, marker->name, marker->nameLength)) {
+                pageMarker = candidate;
+                break;
+            }
+        }
+        
+        // Add marker
+        if (pageMarker) {
+            append(&output, &outputLength,
+                   pageMarker->content, pageMarker->contentLength);
+        }
+    }
+    
+    // Add trailing NULL
+    append(&output, &outputLength, "", 1);
+    
+    fprintf(stderr, "\nRESULT:\n%s\nEND RESULT\n", output);
+    return output;
 }
 
 

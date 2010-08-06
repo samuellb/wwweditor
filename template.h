@@ -32,7 +32,7 @@ typedef struct Template_ Template;
 Template *template_parseFromString(const gchar *templateHTML);
 void template_free(Template *tem);
 
-gchar *template_updatePage(Template *tem, const gchar *pageHTML);
+gchar *template_updatePage(const Template *tem, const gchar *pageHTML);
 
 
 #endif
