@@ -127,7 +127,7 @@ static gboolean block_navigation(WebKitWebView *widget, WebKitWebFrame *frame,
 }
 
 
-void webview_load(WebView *webview, const gchar *url) {
+void webview_load(WebView *webview, const gchar *url, const gchar *content) {
     WebKitWebView *widget = WEBKIT_WEB_VIEW(webview->widget);
     
     // Clean up from last time
@@ -140,7 +140,7 @@ void webview_load(WebView *webview, const gchar *url) {
     g_object_set(settings, "enable-scripts", FALSE,  NULL);
     
     // Load file
-    webkit_web_view_load_uri(widget, url);
+    webkit_web_view_load_string(widget, content, "text/html", NULL, url);
     
     // Disable links
     webview->link_blocker = g_signal_connect(widget,

@@ -24,8 +24,12 @@
 
 #include <string.h>
 #include <gtk/gtk.h>
+#include "project.h"
 #include "webview.h"
 
+
+// Active project
+static Project *project;
 
 // Main window
 static GtkWidget *main_window;
@@ -65,8 +69,15 @@ int main(int argc, char **argv) {
     // Prepare WebKit
     webview = webview_new(notifyFunction);
     webview_widget = webview_getWidget(webview);
-    webview_load(webview, "file://./test/index.html");
     gtk_widget_show(webview_widget);
+    
+    // Load project (TODO remove this code)
+    project = project_init("test");
+    gchar *html = project_loadPage(project, "page1.html");
+    gchar *url = project_getFileURL(project, "page1.html");
+    webview_load(webview, url, html);
+    g_free(url);
+    g_free(html);
     
     // Prepare main window
     main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));

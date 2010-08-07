@@ -14,9 +14,10 @@ editor_js.c: editor.js
 	echo ";" >> $@.tmp
 	mv -f $@.tmp $@
 
-OBJECTS := editor_js.o html5_parser.o html5_tokenizer.o main.o template.o webview_common.o webview_webkit.o
+OBJECTS := editor_js.o html5_parser.o html5_tokenizer.o main.o project.o template.o webview_common.o webview_webkit.o
 
-main.o: webview.h
+main.o: project.h webview.h
+project.o: project.h template.h
 html5_parser.o: html5_parser.h html5_tokenizer.h
 html5_tokenizer.o: html5_tokenizer.h
 template.o: template.h html5_parser.h html5_tokenizer.h

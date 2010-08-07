@@ -22,33 +22,21 @@
 
 */
 
-#ifndef WEBVIEW_H
-#define WEBVIEW_H
+#ifndef PROJECT_H
+#define PROJECT_H
 
-#include <gtk/gtk.h>
+#include <glib.h>
 
-typedef struct WebView_ WebView;
+typedef struct Project_ Project;
 
-typedef struct {
-    char *tagName;
-    char *styles;
-    
-    char *linkHref;
-    char *title;
-} WebViewElementInfo;
-typedef void (*WebViewNotifyFunction)(WebView *view, const WebViewElementInfo *info);
+Project *project_init(const gchar *path);
+void project_free(Project *project);
 
-WebView *webview_new(WebViewNotifyFunction notifyFunction);
-void webview_free(WebView *webview);
+gchar *project_getTemplateURI(const Project *project, const gchar *uri);
+gchar *project_getFileURL(const Project *project, const gchar *uri);
+gchar *project_loadPage(const Project *project, const gchar *uri);
+gboolean project_savePage(Project *project, const gchar *uri, const gchar *html);
 
-GtkWidget *webview_getWidget(WebView *webview);
-
-void webview_load(WebView *webview, const gchar *url, const gchar *content);
-gchar *webview_getHTML(WebView *webview);
-
-void webview_executeScript(WebView *webview, const gchar *script);
-gchar *webview_executeExpression(WebView *webview, const gchar *expr);
 
 #endif
-
 
