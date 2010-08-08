@@ -118,6 +118,7 @@ static void addDirectory(GtkTreeIter *parent,
     GDir *dir = g_dir_open(path, 0, &error);
     if (!dir) {
         g_warning("%s: %s", path, error->message);
+        g_error_free(error);
         return;
     }
     
