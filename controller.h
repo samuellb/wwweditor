@@ -22,21 +22,31 @@
 
 */
 
-#ifndef PROJECT_H
-#define PROJECT_H
+#ifndef CONTROLLER_H
+#define CONTROLLER_H
 
 #include <glib.h>
 
-typedef struct Project_ Project;
+typedef struct {
+    gboolean isTemplate;
+    gchar *templateURI;
+} FileInfo;
 
-Project *project_init(const gchar *path);
-void project_free(Project *project);
+// Controller functions
+void controller_setProjectPath(const gchar *path);
 
-gboolean project_isTemplate(const Project *project, const gchar *uri);
-gchar *project_getTemplateURI(const Project *project, const gchar *uri);
-gchar *project_getFileURL(const Project *project, const gchar *uri);
-gchar *project_loadPage(const Project *project, const gchar *uri);
-gboolean project_savePage(Project *project, const gchar *uri, const gchar *html);
+void controller_newDocument(const gchar *uri, const gchar *templateURI);
+void controller_loadDocument(const gchar *uri);
+void controller_closeDocument();
+
+gboolean controller_canExit();
+FileInfo *controller_getFileInfo(const gchar *uri);
+void controller_freeFileInfo(FileInfo *status);
+
+
+// These functions must be provided by the view
+void view_showDirectory(const gchar *path);
+void view_showDocument(const gchar *fileURL, const gchar *html);
 
 
 #endif

@@ -61,8 +61,13 @@ static gchar *readFile(const Project *project, const gchar *uri) {
 }
 
 
+static const gchar *templateURI = "/template.html";
+gboolean project_isTemplate(const Project *project, const gchar *uri) {
+    return !strcmp(uri, templateURI);
+}
+
+
 gchar *project_getTemplateURI(const Project *project, const gchar *uri) {
-    static const gchar *templateURI = "/template.html";
     return g_strdup(!strcmp(uri, templateURI) ? NULL : templateURI);
 }
 

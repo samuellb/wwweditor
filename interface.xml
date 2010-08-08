@@ -10,14 +10,6 @@
       <column type="gchar"/>
     </columns>
   </object>
-  <object class="GtkTreeStore" id="file_tree">
-    <columns>
-      <!-- column-name filename -->
-      <column type="gchar"/>
-      <!-- column-name mime_type -->
-      <column type="gchar"/>
-    </columns>
-  </object>
   <object class="GtkListStore" id="styles">
     <columns>
       <!-- column-name display_name -->
@@ -63,6 +55,18 @@
         <col id="1" translatable="yes">div</col>
       </row>
     </data>
+  </object>
+  <object class="GtkTreeStore" id="file_tree">
+    <columns>
+      <!-- column-name icon -->
+      <column type="gchararray"/>
+      <!-- column-name display_name -->
+      <column type="gchararray"/>
+      <!-- column-name uri -->
+      <column type="gchararray"/>
+      <!-- column-name is_directory -->
+      <column type="gboolean"/>
+    </columns>
   </object>
   <object class="GtkWindow" id="main_window">
     <child>
@@ -229,10 +233,11 @@
                     <property name="hscrollbar_policy">automatic</property>
                     <property name="vscrollbar_policy">automatic</property>
                     <child>
-                      <object class="GtkTreeView" id="treeview1">
+                      <object class="GtkTreeView" id="file_tree_view">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="model">file_tree</property>
+                        <property name="headers_visible">False</property>
                       </object>
                     </child>
                   </object>
