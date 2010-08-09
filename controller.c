@@ -65,8 +65,8 @@ void controller_newDocument(const gchar *uri, const gchar *templateURI) {
 void controller_loadDocument(const gchar *uri) {
     if (!askSaveAndClose()) return;
     
-    activeDocument = project_getTemplateURI(activeProject, uri);
-    activeTemplate = g_strdup(uri);
+    activeDocument = g_strdup(uri);
+    activeTemplate = project_getTemplateURI(activeProject, uri);
     
     gchar *html = project_loadPage(activeProject, uri);
     gchar *fileURL = project_getFileURL(activeProject, uri);
@@ -77,7 +77,7 @@ void controller_loadDocument(const gchar *uri) {
 
 
 void controller_closeDocument() {
-    askSaveAndClose();
+    if (!askSaveAndClose()) return;
     view_showDocument(NULL, NULL);
 }
 
