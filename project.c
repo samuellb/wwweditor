@@ -61,6 +61,15 @@ static gchar *readFile(const Project *project, const gchar *uri) {
 }
 
 
+static gboolean saveFile(const Project *project, const gchar *uri,
+                       const gchar *contents) {
+    gchar *filename = g_strconcat(project->path, uri, NULL);
+    gboolean ok = g_file_set_contents(filename, contents, -1, NULL);
+    g_free(filename);
+    return ok;
+}
+
+
 static const gchar *templateURI = "/template.html";
 gboolean project_isTemplate(const Project *project, const gchar *uri) {
     return !strcmp(uri, templateURI);
@@ -79,33 +88,45 @@ gchar *project_getFileURL(const Project *project, const gchar *uri) {
 }
 
 
-gchar *project_loadPage(const Project *project, const gchar *uri) {
-    // Load contents
-    gchar *contents = readFile(project, uri);
+static gchar *mergeWithTemplate(const Project *project, const gchar *uri,
+                                const gchar *contents) {
     if (!contents) return NULL;
     
     // Load template
     gchar *templateURI = project_getTemplateURI(project, uri);
-    if (!templateURI) return contents;
+    if (!templateURI) return g_strdup(contents);
     
     gchar *templateContents = project_loadPage(project, templateURI);
     g_free(templateURI);
-    if (!templateContents) return contents;
+    if (!templateContents) return g_strdup(contents);
     
-    // Merge with template
+    // Merge
     Template *tem = template_parseFromString(templateContents);
     gchar *page = template_updatePage(tem, contents);
     template_free(tem);
     
     g_free(templateContents);
+    return page;
+}
+
+
+gchar *project_loadPage(const Project *project, const gchar *uri) {
+    // Load contents
+    gchar *contents = readFile(project, uri);
+    
+    // Merge with template
+    gchar *page = mergeWithTemplate(project, uri, contents);
     g_free(contents);
     return page;
 }
 
 
 gboolean project_savePage(Project *project, const gchar *uri, const gchar *html) {
-    // TODO
-    return FALSE;
+    // Restore and update the template parts
+    gchar *page = mergeWithTemplate(project, uri, html);
+    
+    // Save file
+    return saveFile(project, uri, page);
 }
 
 

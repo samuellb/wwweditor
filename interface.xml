@@ -1,117 +1,95 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkTreeStore" id="domtree">
-    <columns>
-      <!-- column-name description -->
-      <column type="gchar"/>
-      <!-- column-name name -->
-      <column type="gchar"/>
-    </columns>
+  <object class="GtkActionGroup" id="project_actions">
+    <property name="sensitive">False</property>
+    <child>
+      <object class="GtkAction" id="action_new_page">
+        <property name="label" translatable="yes">New page</property>
+        <property name="short_label" translatable="yes">New</property>
+        <property name="stock_id">gtk-new</property>
+      </object>
+    </child>
   </object>
-  <object class="GtkListStore" id="styles">
-    <columns>
-      <!-- column-name display_name -->
-      <column type="gchar"/>
-      <!-- column-name style_class -->
-      <column type="gchar"/>
-    </columns>
+  <object class="GtkActionGroup" id="document_actions">
+    <property name="sensitive">False</property>
+    <child>
+      <object class="GtkAction" id="action_save_page">
+        <property name="label" translatable="yes">Save page</property>
+        <property name="short_label" translatable="yes">Save</property>
+        <property name="stock_id">gtk-save</property>
+      </object>
+      <accelerator key="s" modifiers="GDK_CONTROL_MASK"/>
+    </child>
   </object>
-  <object class="GtkListStore" id="element_types">
-    <columns>
-      <!-- column-name display_name -->
-      <column type="gchararray"/>
-      <!-- column-name tag_name -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Heading 1</col>
-        <col id="1" translatable="yes">h1</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Heading 2</col>
-        <col id="1" translatable="yes">h2</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Heading 3</col>
-        <col id="1" translatable="yes">h3</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Heading 4</col>
-        <col id="1" translatable="yes">h4</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Paragraph</col>
-        <col id="1" translatable="yes">p</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Quote</col>
-        <col id="1" translatable="yes">blockquote</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Block</col>
-        <col id="1" translatable="yes">div</col>
-      </row>
-    </data>
-  </object>
-  <object class="GtkTreeStore" id="file_tree">
-    <columns>
-      <!-- column-name icon -->
-      <column type="gchararray"/>
-      <!-- column-name display_name -->
-      <column type="gchararray"/>
-      <!-- column-name uri -->
-      <column type="gchararray"/>
-      <!-- column-name is_directory -->
-      <column type="gboolean"/>
-    </columns>
+  <object class="GtkActionGroup" id="global_actions">
+    <child>
+      <object class="GtkAction" id="action_quit">
+        <property name="label" translatable="yes">Quit</property>
+        <property name="stock_id">gtk-quit</property>
+      </object>
+      <accelerator key="q" modifiers="GDK_CONTROL_MASK"/>
+    </child>
+    <child>
+      <object class="GtkAction" id="action_open_project">
+        <property name="label" translatable="yes">Open project</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkAction" id="action_new_project">
+        <property name="label" translatable="yes">New project</property>
+      </object>
+    </child>
   </object>
   <object class="GtkWindow" id="main_window">
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
         <child>
-          <object class="GtkMenuBar" id="menubar1">
+          <object class="GtkMenuBar" id="menubar">
             <property name="visible">True</property>
             <child>
-              <object class="GtkMenuItem" id="menuitem1">
+              <object class="GtkMenuItem" id="menu_file">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">_File</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
-                  <object class="GtkMenu" id="menu1">
+                  <object class="GtkMenu" id="file_menu">
                     <property name="visible">True</property>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem1">
-                        <property name="label">gtk-new</property>
+                      <object class="GtkImageMenuItem" id="menu_new_project">
                         <property name="visible">True</property>
+                        <property name="related_action">action_new_project</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem2">
-                        <property name="label">gtk-open</property>
+                      <object class="GtkImageMenuItem" id="menu_open_project">
                         <property name="visible">True</property>
+                        <property name="related_action">action_open_project</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem3">
-                        <property name="label">gtk-save</property>
+                      <object class="GtkSeparatorMenuItem" id="menuitem5">
                         <property name="visible">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="menu_new_page">
+                        <property name="visible">True</property>
+                        <property name="related_action">action_new_page</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem4">
-                        <property name="label">gtk-save-as</property>
+                      <object class="GtkImageMenuItem" id="menu_save_page">
                         <property name="visible">True</property>
-                        <property name="use_underline">True</property>
+                        <property name="related_action">action_save_page</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -121,9 +99,9 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem5">
-                        <property name="label">gtk-quit</property>
+                      <object class="GtkImageMenuItem" id="menu_quit">
                         <property name="visible">True</property>
+                        <property name="related_action">action_quit</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -133,15 +111,15 @@
               </object>
             </child>
             <child>
-              <object class="GtkMenuItem" id="menuitem2">
+              <object class="GtkMenuItem" id="menu_edit">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">_Edit</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
-                  <object class="GtkMenu" id="menu2">
+                  <object class="GtkMenu" id="edit_menu">
                     <property name="visible">True</property>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem6">
+                      <object class="GtkImageMenuItem" id="menu_cut">
                         <property name="label">gtk-cut</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
@@ -149,7 +127,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem7">
+                      <object class="GtkImageMenuItem" id="menu_copy">
                         <property name="label">gtk-copy</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
@@ -157,7 +135,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem8">
+                      <object class="GtkImageMenuItem" id="menu_paste">
                         <property name="label">gtk-paste</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
@@ -165,7 +143,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem9">
+                      <object class="GtkImageMenuItem" id="menu_delete">
                         <property name="label">gtk-delete</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
@@ -177,22 +155,22 @@
               </object>
             </child>
             <child>
-              <object class="GtkMenuItem" id="menuitem3">
+              <object class="GtkMenuItem" id="menu_view">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">_View</property>
                 <property name="use_underline">True</property>
               </object>
             </child>
             <child>
-              <object class="GtkMenuItem" id="menuitem4">
+              <object class="GtkMenuItem" id="menu_help">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">_Help</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
-                  <object class="GtkMenu" id="menu3">
+                  <object class="GtkMenu" id="help_menu">
                     <property name="visible">True</property>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem10">
+                      <object class="GtkImageMenuItem" id="menu_about">
                         <property name="label">gtk-about</property>
                         <property name="visible">True</property>
                         <property name="use_underline">True</property>
@@ -383,7 +361,7 @@
                                       <object class="GtkEntry" id="link_href_entry">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="invisible_char">&#x25CF;</property>
+                                        <property name="invisible_char">●</property>
                                         <property name="text" translatable="yes">http://</property>
                                       </object>
                                       <packing>
@@ -409,7 +387,7 @@
                                       <object class="GtkEntry" id="link_title_entry">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="invisible_char">&#x25CF;</property>
+                                        <property name="invisible_char">●</property>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -468,5 +446,71 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkTreeStore" id="file_tree">
+    <columns>
+      <!-- column-name icon -->
+      <column type="gchararray"/>
+      <!-- column-name display_name -->
+      <column type="gchararray"/>
+      <!-- column-name uri -->
+      <column type="gchararray"/>
+      <!-- column-name is_directory -->
+      <column type="gboolean"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="element_types">
+    <columns>
+      <!-- column-name display_name -->
+      <column type="gchararray"/>
+      <!-- column-name tag_name -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Heading 1</col>
+        <col id="1" translatable="yes">h1</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Heading 2</col>
+        <col id="1" translatable="yes">h2</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Heading 3</col>
+        <col id="1" translatable="yes">h3</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Heading 4</col>
+        <col id="1" translatable="yes">h4</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Paragraph</col>
+        <col id="1" translatable="yes">p</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Quote</col>
+        <col id="1" translatable="yes">blockquote</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Block</col>
+        <col id="1" translatable="yes">div</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="styles">
+    <columns>
+      <!-- column-name display_name -->
+      <column type="gchar"/>
+      <!-- column-name style_class -->
+      <column type="gchar"/>
+    </columns>
+  </object>
+  <object class="GtkTreeStore" id="domtree">
+    <columns>
+      <!-- column-name description -->
+      <column type="gchar"/>
+      <!-- column-name name -->
+      <column type="gchar"/>
+    </columns>
   </object>
 </interface>

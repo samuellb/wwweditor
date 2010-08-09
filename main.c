@@ -29,8 +29,12 @@
 #include "webview.h"
 
 
-// Main window
+static GtkBuilder *builder;
 static GtkWidget *main_window;
+
+// Actions
+static GtkActionGroup *projectActions;
+static GtkActionGroup *documentActions;
 
 // File tree
 static GtkTreeStore *fileTree;
@@ -159,6 +163,7 @@ static void addDirectory(GtkTreeIter *parent,
 
 void view_showDirectory(const gchar *path) {
     gtk_tree_store_clear(fileTree);
+    gtk_action_group_set_sensitive(projectActions, (path != NULL));
     if (!path) return;
     
     addDirectory(NULL, path, "/");
@@ -168,6 +173,25 @@ void view_showDirectory(const gchar *path) {
 void view_showDocument(const gchar *fileURL, const gchar *html) {
     if (html) webview_load(webview, fileURL, html);
     else webview_load(webview, "", "");
+    
+    gtk_action_group_set_sensitive(documentActions, (html != NULL));
+}
+
+
+gchar *view_getDocumentHTML() {
+    return webview_getHTML(webview);
+}
+
+
+static void actionSavePage(GtkAction *action, gpointer user_data) {
+    controller_saveDocument();
+}
+
+
+static void setAction(const gchar *actionName,
+                      void (*handler)(GtkAction *action, gpointer user_data)) {
+    GtkAction *action = GTK_ACTION(gtk_builder_get_object(builder, actionName));
+    g_signal_connect(action, "activate", G_CALLBACK(handler), NULL);
 }
 
 
@@ -177,7 +201,7 @@ int main(int argc, char **argv) {
     gtk_init(&argc, &argv);
     
     // Load the user interface
-    GtkBuilder *builder = gtk_builder_new();
+    builder = gtk_builder_new();
     GError *error = NULL;
     
     if (!gtk_builder_add_from_file(builder, "interface.xml", &error)) {
@@ -192,6 +216,14 @@ int main(int argc, char **argv) {
     // Prepare main window
     main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
     
+    // Prepare actions
+    projectActions = GTK_ACTION_GROUP(gtk_builder_get_object(builder, "project_actions"));
+    documentActions = GTK_ACTION_GROUP(gtk_builder_get_object(builder, "document_actions"));
+    
+    // TODO set up handlers here
+    setAction("action_save_page", actionSavePage);
+    
+    // Prepare file tree
     GtkTreeView *fileTreeView = GTK_TREE_VIEW(gtk_builder_get_object(builder, "file_tree_view"));
     fileTree = GTK_TREE_STORE(gtk_builder_get_object(builder, "file_tree"));
     
@@ -213,6 +245,7 @@ int main(int argc, char **argv) {
     
     g_signal_connect(fileTreeView, "row-activated", G_CALLBACK(fileSelected), NULL);
     
+    // Prepare document view
     GtkContainer *page_container = GTK_CONTAINER(gtk_builder_get_object(builder, "page_container"));
     gtk_container_add(page_container, webview_widget);
     

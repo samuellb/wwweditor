@@ -76,6 +76,13 @@ void controller_loadDocument(const gchar *uri) {
 }
 
 
+void controller_saveDocument() {
+    gchar *html = view_getDocumentHTML();
+    project_savePage(activeProject, activeDocument, html);
+    g_free(html);
+}
+
+
 void controller_closeDocument() {
     if (!askSaveAndClose()) return;
     view_showDocument(NULL, NULL);

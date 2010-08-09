@@ -37,6 +37,7 @@ void controller_setProjectPath(const gchar *path);
 
 void controller_newDocument(const gchar *uri, const gchar *templateURI);
 void controller_loadDocument(const gchar *uri);
+void controller_saveDocument();
 void controller_closeDocument();
 
 gboolean controller_canExit();
@@ -47,6 +48,7 @@ void controller_freeFileInfo(FileInfo *status);
 // These functions must be provided by the view
 void view_showDirectory(const gchar *path);
 void view_showDocument(const gchar *fileURL, const gchar *html);
+gchar *view_getDocumentHTML();
 
 
 #endif
