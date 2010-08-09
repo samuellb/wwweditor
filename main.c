@@ -55,7 +55,14 @@ static WebView *webview;
 static GtkWidget *webview_widget;
 
 // Element properties
-static GtkWidget *element_types_view;
+static GtkListStore *elementTypes;
+static GtkTreeView *elementTypesView;
+
+typedef enum {
+    ElementColumn_DisplayName = 0,
+    ElementColumn_TagName,
+} ElementTypesColumnId;
+
 static GtkWidget *styles_view;
 static GtkWidget *link_expander;
 static GtkWidget *link_href_entry;
@@ -63,12 +70,56 @@ static GtkWidget *link_title_entry;
 
 
 static void notifyFunction(WebView *view, const WebViewElementInfo *info) {
-    gboolean isLink = !strcmp(info->tagName, "a");
+    // Update element selection
+    GtkTreeModel *elementsModel = GTK_TREE_MODEL(elementTypes);
+    GtkTreeSelection *elementsSelection = gtk_tree_view_get_selection(elementTypesView);
+    GtkTreeIter iter;
+    gboolean valid = gtk_tree_model_get_iter_first(elementsModel, &iter);
+    while (valid) {
+        gchar *tagName;
+        gtk_tree_model_get(elementsModel, &iter,
+                           ElementColumn_TagName, &tagName, -1);
+        gint diff = strcmp(info->tagName, tagName);
+        g_free(tagName);
+        
+        if (!diff) {
+            // Select
+            gtk_tree_selection_select_iter(elementsSelection, &iter);
+            break;
+        }
+        valid = gtk_tree_model_iter_next(elementsModel, &iter);
+    }
     
+    if (!valid) {
+        // Clear selection
+        gtk_tree_selection_unselect_all(elementsSelection);
+    }
+    
+    // Update link view
+    gboolean isLink = !strcmp(info->tagName, "a");
     gtk_entry_set_text(GTK_ENTRY(link_href_entry), info->linkHref);
     gtk_entry_set_text(GTK_ENTRY(link_title_entry), info->title);
     gtk_widget_set_visible(link_expander, isLink);
 }
+
+
+static void elementTypeSelected(GtkTreeView *tree_view, GtkTreePath *path,
+                                GtkTreeViewColumn *column, gpointer user_data) {
+    GtkTreeModel *model = GTK_TREE_MODEL(elementTypes);
+    GtkTreeIter iter;
+    gchar *tagName;
+    
+    gtk_tree_model_get_iter(model, &iter, path);
+    gtk_tree_model_get(model, &iter, ElementColumn_TagName, &tagName, -1);
+    
+    fprintf(stderr, "selected %s!\n", tagName);
+    gchar *script = g_strdup_printf("setElementType('%s');", tagName);
+    webview_executeScript(webview, script);
+    
+    g_free(script);
+    g_free(tagName);
+}
+
 
 
 static void fileSelected(GtkTreeView *tree_view, GtkTreePath *path,
@@ -227,21 +278,21 @@ int main(int argc, char **argv) {
     GtkTreeView *fileTreeView = GTK_TREE_VIEW(gtk_builder_get_object(builder, "file_tree_view"));
     fileTree = GTK_TREE_STORE(gtk_builder_get_object(builder, "file_tree"));
     
-    GtkTreeViewColumn *column = gtk_tree_view_column_new();
+    GtkTreeViewColumn *fileColumn = gtk_tree_view_column_new();
     GtkCellRenderer *iconRenderer = GTK_CELL_RENDERER(gtk_cell_renderer_pixbuf_new());
-    gtk_tree_view_column_pack_start(column, iconRenderer, FALSE);
-    gtk_tree_view_column_add_attribute(column, iconRenderer,
+    gtk_tree_view_column_pack_start(fileColumn, iconRenderer, FALSE);
+    gtk_tree_view_column_add_attribute(fileColumn, iconRenderer,
         "stock-id", FileColumn_Icon);
     GtkCellRenderer *filenameRenderer = GTK_CELL_RENDERER(gtk_cell_renderer_text_new());
-    gtk_tree_view_column_pack_start(column, filenameRenderer, TRUE);
-    gtk_tree_view_column_add_attribute(column, filenameRenderer,
+    gtk_tree_view_column_pack_start(fileColumn, filenameRenderer, TRUE);
+    gtk_tree_view_column_add_attribute(fileColumn, filenameRenderer,
         "text", FileColumn_DisplayName);
     
     gtk_tree_sortable_set_sort_func(GTK_TREE_SORTABLE(fileTree),
         FileColumn_DisplayName, fileSortFunc, NULL, NULL);
     //gtk_tree_view_column_set_sort_column_id(column, FileColumn_DisplayName);
     gtk_tree_sortable_set_sort_column_id(GTK_TREE_SORTABLE(fileTree), FileColumn_DisplayName, GTK_SORT_ASCENDING);
-    gtk_tree_view_append_column(fileTreeView, column);
+    gtk_tree_view_append_column(fileTreeView, fileColumn);
     
     g_signal_connect(fileTreeView, "row-activated", G_CALLBACK(fileSelected), NULL);
     
@@ -249,7 +300,18 @@ int main(int argc, char **argv) {
     GtkContainer *page_container = GTK_CONTAINER(gtk_builder_get_object(builder, "page_container"));
     gtk_container_add(page_container, webview_widget);
     
-    element_types_view = GTK_WIDGET(gtk_builder_get_object(builder, "element_types_view"));
+    // Prepare the right sidebar
+    elementTypesView = GTK_TREE_VIEW(gtk_builder_get_object(builder, "element_types_view"));
+    elementTypes = GTK_LIST_STORE(gtk_builder_get_object(builder, "element_types"));
+    
+    GtkTreeViewColumn *elementColumn = gtk_tree_view_column_new_with_attributes(
+        "", GTK_CELL_RENDERER(gtk_cell_renderer_text_new()),
+        "text", ElementColumn_DisplayName, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(elementTypesView), elementColumn);
+    
+    // TODO track selection or use radio button instead?
+    g_signal_connect(elementTypesView, "row-activated", G_CALLBACK(elementTypeSelected), NULL);
+    
     styles_view = GTK_WIDGET(gtk_builder_get_object(builder, "styles_view"));
     link_expander = GTK_WIDGET(gtk_builder_get_object(builder, "link_expander"));
     link_href_entry = GTK_WIDGET(gtk_builder_get_object(builder, "link_href_entry"));
