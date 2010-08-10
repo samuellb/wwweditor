@@ -399,7 +399,7 @@ gboolean tokenizer_readToken(const gchar **html, Token *token) {
         token->data = *html;
         while (**html && **html != '>') { (*html)++; }
         token->dataLength = *html - token->data;
-        (*html)++;
+        if (**html == '>') (*html)++;
         return TRUE;
     }
     
