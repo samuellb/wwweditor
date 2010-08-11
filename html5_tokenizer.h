@@ -36,6 +36,7 @@ typedef enum {
     Token_EndTag,
     Token_Comment, // includes doctypes
     Token_Text,
+    Token_SpecialText, // contents of <title>, <style>, etc.
 } TokenType;
 
 // All HTML5 tags. Generated with "make html5enum"

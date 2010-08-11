@@ -35,7 +35,12 @@ typedef struct {
     gboolean inBeginningOfElement : 1;
     gboolean inForm : 1;
     
-    //enum { Normal = 0, InScript, InRawText, InRCData } specialState;
+    enum {
+        SpecialState_Normal = 0,
+        /*SpecialState_InScript,*/
+        SpecialState_InRawText,
+        SpecialState_InRCData,
+    } specialState;
 } ParserState;
 
 

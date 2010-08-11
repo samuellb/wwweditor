@@ -138,26 +138,28 @@ gboolean parser_readToken(const gchar **html, Token *token, ParserState *state) 
     const gchar *previousPoint = *html;
     TagType type;
     
-    /*if (state->specialState) {
-        Token *current = state->openTags[state->level-1];
+    if (state->specialState) {
+        Token *current = &state->openTags[state->level-1];
         switch (state->specialState) {
-            case InScript:
+            /*case SpecialState_InScript:
                 tokenizer_skipScript(html);
                 token->type = Token_None;
-                return TRUE;
-            case InRawText:
-                tokenizer_skipScript(html, current);
+                return TRUE;*/
+            case SpecialState_InRawText:
+                tokenizer_skipRawText(html, current);
                 break;
-            case InRCData:
-                tokenizer_skipScript(html, current);
+            case SpecialState_InRCData:
+                tokenizer_skipRCData(html, current);
                 break;
             default: break;
         }
         
+        token->type = Token_SpecialText;
         token->data = previousPoint;
         token->dataLength = *html - previousPoint;
+        state->specialState = SpecialState_Normal;
         return TRUE;
-    }*/
+    }
     
     if (!tokenizer_readToken(html, token)) return FALSE;
     
@@ -194,20 +196,14 @@ gboolean parser_readToken(const gchar **html, Token *token, ParserState *state) 
             // Handle tags with special content
             // TODO handle different insertion modes
             if (type & TagType_HasScript) {
-                //state->specialState = InScript;
+                //state->specialState = SpecialState_InScript;
                 tokenizer_skipScript(html);
                 token->type = Token_None;
                 return TRUE;
             } else if (type & TagType_HasRawText) {
-                //state->specialState = InRawText;
-                tokenizer_skipRawText(html, token);
-                token->type = Token_None;
-                return TRUE;
+                state->specialState = SpecialState_InRawText;
             } else if (type & TagType_HasRCData) {
-                //state->specialState = InRCData;
-                tokenizer_skipRCData(html, token);
-                token->type = Token_None;
-                return TRUE;
+                state->specialState = SpecialState_InRCData;
             } else if (token->tag == Tag_plaintext) {
                 token->type = Token_Text;
                 token->data = *html;

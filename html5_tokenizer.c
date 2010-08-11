@@ -472,6 +472,7 @@ gboolean tokenizer_skipRawText(const gchar **html, const Token *startTag) {
 gboolean tokenizer_skipRCData(const gchar **html, const Token *startTag) {
     // Skips "RCData" (<textarea> contents)
     while (**html) {
+        const gchar *endTag = *html;
         if (*(*html)++ != '<') continue;
         if (*(*html)++ != '/') continue;
         
@@ -480,10 +481,9 @@ gboolean tokenizer_skipRCData(const gchar **html, const Token *startTag) {
         
         if (**html && strchr("\t\v\n\r />", **html)) {
             // The correct end tag
-            if (!skipAttributes(html)) return FALSE;
-            
-            (*html)++; // Skip ">"
-            return TRUE;
+            gboolean valid = skipAttributes(html);
+            *html = endTag;
+            return valid;
         }
     }
     return FALSE;

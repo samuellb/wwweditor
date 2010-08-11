@@ -99,7 +99,7 @@ static void parseMarkers(MarkerList *markers, const gchar *html) {
     markers->count = 0;
     markers->list = NULL;
     
-    ParserState state = { 0, NULL, 0, 0 };
+    ParserState state = { 0, NULL, 0, 0, 0 };
     Token token;
     const gchar *prevTokenEnd = html;
     const gchar *prevTagEnd = NULL;
@@ -118,18 +118,24 @@ static void parseMarkers(MarkerList *markers, const gchar *html) {
         }
         
         if (!marker) {
-            // Look for <!--@section--> comments
+            // Look for markers
             size_t nameLength;
             const gchar *name = getSpecialComment(&token, &state, &nameLength);
             if (name) {
-                fprintf(stderr, "found special comment: [%.*s]\n", nameLength, name);
-                
-                // Add marker
+                // Found <!--@section--> comment
                 marker = addMarker(markers);
                 marker->name = name;
                 marker->nameLength = nameLength;
                 marker->startTag = state.openTags[state.level-1].data;
                 marker->content = prevTagEnd;
+                marker->contentLength = 0;
+            } else if (token.type == Token_StartTag && token.tag == Tag_title) {
+                // Found a title tag (implicit marker)
+                marker = addMarker(markers);
+                marker->name = "<title>";
+                marker->nameLength = 7;
+                marker->startTag = state.openTags[state.level-1].data;
+                marker->content = html;
                 marker->contentLength = 0;
             }
         } else if (isTagClosed(&state, marker)) {
