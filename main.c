@@ -132,6 +132,8 @@ static void fileSelected(GtkTreeView *tree_view, GtkTreePath *path,
     gtk_tree_model_get(model, &iter, FileColumn_URI, &uri, -1);
     
     controller_loadDocument(uri);
+    
+    g_free(uri);
 }
 
 
@@ -208,6 +210,7 @@ static void addDirectory(GtkTreeIter *parent,
                            -1);
         
         g_free(uri);
+        g_free(filename);
     }
     g_dir_close(dir);
 }
