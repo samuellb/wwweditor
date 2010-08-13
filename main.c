@@ -187,7 +187,7 @@ static void addDirectory(GtkTreeIter *parent,
         gtk_tree_store_append(fileTree, &iter, parent);
         
         gchar *filename = g_build_filename(path, entry, NULL);
-        gchar *uri = g_build_filename(baseUri, entry, NULL);
+        gchar *uri = g_build_path("/", baseUri, entry, NULL);
         const gchar *icon;
         gboolean isDir = g_file_test(filename, G_FILE_TEST_IS_DIR);
         if (isDir) {
