@@ -161,11 +161,26 @@ void webview_executeScript(WebView *webview, const gchar *script) {
 
 
 gchar *webview_executeExpression(WebView *webview, const gchar *expr) {
-    gchar *script = g_strdup_printf("document.title = %s;", expr);
+    WebKitWebView *widget = WEBKIT_WEB_VIEW(webview->widget);
+    
+    /*
+        A "nicer" solution would be to catch "window-object-cleared" and add
+        a special property/function there, but that's much more work for no
+        practical benefit.
+    */
+    
+    // Use the title to store the value of the expression
+    gchar *script = g_strdup_printf("var oldTitle = document.title;"
+                                    "document.title = %s;", expr);
     
     webview_executeScript(webview, script);
     g_free(script);
-    return g_strdup(webkit_web_view_get_title(WEBKIT_WEB_VIEW(webview->widget)));
+    
+    gchar *result = g_strdup(webkit_web_view_get_title(widget));
+    
+    // Restore old title
+    webview_executeScript(webview, "document.title = oldTitle; delete oldTitle;");
+    return result;
 }
 
 
