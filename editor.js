@@ -156,3 +156,43 @@ function setElementType(elementName) {
 }
 
 
+// Automatic cleanup of the HTML
+var handleModifications = true;
+function subtreeModified(event) {
+    if (!handleModifications) return;
+    handleModifications = false;
+    
+    for (var node = window.getSelection().anchorNode;
+         node != null; node = node.parentNode) {
+        if (node.nodeType == Node.ELEMENT_NODE) cleanup(node);
+        var sibling = node.nextSibling;
+        if (sibling != null && sibling.nodeType == Node.ELEMENT_NODE) cleanup(sibling);
+    }
+    
+    handleModifications = true;
+}
+
+function handleBackspace(event) {
+    // Workaround for WebKit
+    if (event.keyCode == 8 || event.charCode == 8) {
+        subtreeModified(null);
+    }
+}
+
+function cleanup(elem) {
+    var parent = elem.parentNode;
+    if (elem.nodeName == "SPAN" && elem.className == "Apple-style-span" && parent != null) {
+        // Remove <span> element and replace it with it's contents
+        while (elem.firstChild != null) {
+            parent.insertBefore(elem.firstChild, elem);
+        }
+        parent.removeChild(elem);
+    }
+}
+
+document.documentElement.addEventListener("DOMSubtreeModified", subtreeModified, true);
+document.documentElement.addEventListener("keypress", handleBackspace, true);
+document.documentElement.addEventListener("keyup", handleBackspace, true);
+
+
+
