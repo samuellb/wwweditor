@@ -50,7 +50,7 @@ static gboolean askSaveAndClose() {
 
 void controller_setProjectPath(const gchar *path) {
     if (!askSaveAndClose()) return;
-    view_showDocument(NULL, NULL);
+    view_showDocument(NULL, NULL, FALSE);
     
     activeProject = (path ? project_init(path) : NULL);
     view_showDirectory(path);
@@ -70,7 +70,8 @@ void controller_loadDocument(const gchar *uri) {
     
     gchar *html = project_loadPage(activeProject, uri);
     gchar *fileURL = project_getFileURL(activeProject, uri);
-    view_showDocument(fileURL, html);
+    gboolean wholePageEditable = (activeTemplate == NULL);
+    view_showDocument(fileURL, html, wholePageEditable);
     g_free(fileURL);
     g_free(html);
 }
@@ -85,7 +86,7 @@ void controller_saveDocument() {
 
 void controller_closeDocument() {
     if (!askSaveAndClose()) return;
-    view_showDocument(NULL, NULL);
+    view_showDocument(NULL, NULL, FALSE);
 }
 
 

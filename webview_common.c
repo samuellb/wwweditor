@@ -27,6 +27,9 @@
 #include <stdarg.h>
 
 
+extern const char *editor_js;
+
+
 /**
  * Reads a line from a string and advances the string pointer to the next
  * line.
@@ -80,6 +83,23 @@ void webview_executeFormattedScript(WebView *webview,
     va_end(args);
 }
 
+
+static void setEditorBoolean(WebView *webview,
+                             const char *property, gboolean value) {
+    webview_executeFormattedScript(webview, "editor.%s = %s;",
+        property, (value ? "true" : "false"));
+}
+
+
+void webview_private_initEditorScript(WebView *webview) {
+    // Create an object with all settings
+    WebViewCommon *common = (WebViewCommon*)webview;
+    webview_executeScript(webview, "var editor = { };");
+    setEditorBoolean(webview, "wholePageEditable", common->wholePageEditable);
+    
+    // Run editor.js
+    webview_executeScript(webview, editor_js);
+}
 
 
 

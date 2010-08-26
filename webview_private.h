@@ -27,7 +27,16 @@
 
 #include "webview.h"
 
+// Common data regardless of implementation
+typedef struct {
+    WebViewNotifyFunction notifyFunction;
+    
+    // Settings
+    gboolean wholePageEditable;
+} WebViewCommon;
+
 WebViewElementInfo *webview_private_createElementInfo(const gchar *jsString);
 void webview_private_freeElementInfo(WebViewElementInfo *info);
+void webview_private_initEditorScript(WebView *webview);
 
 #endif

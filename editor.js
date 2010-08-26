@@ -33,7 +33,12 @@ Array.prototype.contains = function(elem) { return this.indexOf(elem) != -1; };
 
 // Make marked sections editable
 var editableElements = [];
-// TODO should work differently for template documents
+
+function makeNodeEditable(node) {
+    node.contentEditable = true;
+    editableElements.push(node);
+}
+
 function makeMarkedEditable(obj) {
     var inBeginning = true;
     for (var node = obj.firstChild; node != null; node = node.nextSibling) {
@@ -44,8 +49,7 @@ function makeMarkedEditable(obj) {
         // Look for special comments in the beginning
         if (node.nodeType == Node.COMMENT_NODE && inBeginning) {
             if (node.nodeValue.search(/^\s*@\s*/) == 0) {
-                node.parentNode.contentEditable = true;
-                editableElements.push(node.parentNode);
+                makeNodeEditable(node.parentNode);
             }
         }
         inBeginning = false;
@@ -55,7 +59,12 @@ function makeMarkedEditable(obj) {
     }
 }
 
-makeMarkedEditable(document.documentElement);
+
+if (editor.wholePageEditable) {
+    makeNodeEditable(document.documentElement);
+} else {
+    makeMarkedEditable(document.documentElement);
+}
 
 
 function nodeIsEditable(node) {

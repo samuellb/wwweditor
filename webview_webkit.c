@@ -28,13 +28,12 @@
 #include <webkit/webkit.h>
 
 struct WebView_ {
-    WebViewNotifyFunction notifyFunction;
+    WebViewCommon common;
+    
     GtkWidget *widget;
     guint link_blocker;
 };
 
-
-extern const char *editor_js;
 
 /**
  * Triggered when the document load status changes. Used to detect when the
@@ -49,9 +48,9 @@ static void load_status_notify(GObject *gobject, GParamSpec *pspec, gpointer use
     WebView *webview = (WebView*)user_data;
     GObject *settings = G_OBJECT(webkit_web_view_get_settings(WEBKIT_WEB_VIEW(webview->widget)));
     
-    // Install notification script
+    // Initialize the editor script
     g_object_set(settings, "enable-scripts", TRUE,  NULL);
-    webview_executeScript(webview, editor_js);
+    webview_private_initEditorScript(webview);
 }
 
 
@@ -65,7 +64,7 @@ static void status_changed(WebKitWebView *widget, const gchar *text, gpointer us
     WebViewElementInfo *info = webview_private_createElementInfo(text);
     
     WebView *webview = (WebView*)user_data;
-    webview->notifyFunction(webview, info);
+    webview->common.notifyFunction(webview, info);
     
     webview_private_freeElementInfo(info);
 }
@@ -73,7 +72,7 @@ static void status_changed(WebKitWebView *widget, const gchar *text, gpointer us
 
 WebView *webview_new(WebViewNotifyFunction notifyFunction) {
     WebView *webview = g_malloc(sizeof(WebView));
-    webview->notifyFunction = notifyFunction;
+    webview->common.notifyFunction = notifyFunction;
     
     // Create an editable WebKit view
     GtkWidget *widget = webkit_web_view_new();
@@ -127,7 +126,8 @@ static gboolean block_navigation(WebKitWebView *widget, WebKitWebFrame *frame,
 }
 
 
-void webview_load(WebView *webview, const gchar *url, const gchar *content) {
+void webview_load(WebView *webview, const gchar *url, const gchar *content,
+                  gboolean wholePageEditable) {
     WebKitWebView *widget = WEBKIT_WEB_VIEW(webview->widget);
     
     // Clean up from last time
@@ -138,6 +138,8 @@ void webview_load(WebView *webview, const gchar *url, const gchar *content) {
     
     GObject *settings = G_OBJECT(webkit_web_view_get_settings(WEBKIT_WEB_VIEW(widget)));
     g_object_set(settings, "enable-scripts", FALSE,  NULL);
+    
+    webview->common.wholePageEditable = wholePageEditable;
     
     // Load file
     webkit_web_view_load_string(widget, content, "text/html", NULL, url);

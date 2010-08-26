@@ -43,7 +43,8 @@ void webview_free(WebView *webview);
 
 GtkWidget *webview_getWidget(WebView *webview);
 
-void webview_load(WebView *webview, const gchar *url, const gchar *content);
+void webview_load(WebView *webview, const gchar *url, const gchar *content,
+                  gboolean wholePageEditable);
 gchar *webview_getHTML(WebView *webview);
 
 void webview_executeScript(WebView *webview, const gchar *script);

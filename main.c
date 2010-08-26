@@ -224,9 +224,10 @@ void view_showDirectory(const gchar *path) {
 }
 
 
-void view_showDocument(const gchar *fileURL, const gchar *html) {
-    if (html) webview_load(webview, fileURL, html);
-    else webview_load(webview, "", "");
+void view_showDocument(const gchar *fileURL, const gchar *html,
+                       gboolean wholePageEditable) {
+    if (html) webview_load(webview, fileURL, html, wholePageEditable);
+    else webview_load(webview, "", "", FALSE);
     
     gtk_action_group_set_sensitive(documentActions, (html != NULL));
 }
