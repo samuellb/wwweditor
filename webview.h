@@ -47,6 +47,8 @@ void webview_load(WebView *webview, const gchar *url, const gchar *content);
 gchar *webview_getHTML(WebView *webview);
 
 void webview_executeScript(WebView *webview, const gchar *script);
+void webview_executeFormattedScript(WebView *webview,
+                                    const char *format, ...);
 gchar *webview_executeExpression(WebView *webview, const gchar *expr);
 
 #endif

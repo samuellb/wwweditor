@@ -170,11 +170,8 @@ gchar *webview_executeExpression(WebView *webview, const gchar *expr) {
     */
     
     // Use the title to store the value of the expression
-    gchar *script = g_strdup_printf("var oldTitle = document.title;"
-                                    "document.title = %s;", expr);
-    
-    webview_executeScript(webview, script);
-    g_free(script);
+    webview_executeFormattedScript(webview, "var oldTitle = document.title;"
+                                            "document.title = %s;", expr);
     
     gchar *result = g_strdup(webkit_web_view_get_title(widget));
     

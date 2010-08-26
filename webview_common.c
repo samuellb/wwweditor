@@ -24,6 +24,9 @@
 
 #include "webview_private.h"
 
+#include <stdarg.h>
+
+
 /**
  * Reads a line from a string and advances the string pointer to the next
  * line.
@@ -62,6 +65,21 @@ void webview_private_freeElementInfo(WebViewElementInfo *info) {
     g_free(info->tagName); // frees all strings
     g_free(info);
 }
+
+
+void webview_executeFormattedScript(WebView *webview,
+                                    const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    
+    gchar *script = g_strdup_vprintf(format, args);
+    
+    webview_executeScript(webview, script);
+    
+    g_free(script);
+    va_end(args);
+}
+
 
 
 
