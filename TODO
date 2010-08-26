@@ -1,0 +1,43 @@
+
+Parser(?):
+  [ ] Ensure the output (input?) is always UTF-8:
+        g_utf8_validate(s, NULL, NULL)
+        conversion?
+  [ ] How are comment handled in raw/rc-data?
+  [ ] Fix long comments with ">" inside.
+
+Templates:
+  [X] Implement template markers completely
+  [ ] How to handle recursive templates?
+  [X] Implement template updating
+
+Projects:
+  [ ] Add a function for getting the project info for a file
+      (whether it's a template, and the template filename if any)
+  [ ] Project file loading/saving
+  [ ] Project loading in the UI
+  [X] Populating the file list
+  [ ] Adding/removing files
+  [X] Template editing. Make <body> an implicitly editable section?
+  [ ] Load subdirectories on demand
+
+Editor (C):
+  [X] Saving files
+  [X] Paragraph types
+  [ ] Changing editable sections
+  [ ] Styles
+  [X] Free memory after gtk_tree_model_get, etc...
+  [ ] Style tags (bold, italic, etc)
+  [ ] Image insertion
+  [ ] Audio and video insertion
+  [ ] Drag and drop (image/*, audio/*, video/*)
+  [ ] Table insertion
+  [ ] What happens if something is inserted before the <!--@marker-->?
+  [ ] Clean up the code (indentation, remove Apple-style-span, <h3><span style="font-...: normal">, etc.)
+  [X] Clean up some aspects of the code live
+  [ ] Javascript plugins/extensions?
+  [ ] Dirty change detection
+
+Editor (JS):
+  [ ] Make non-editable elements non-focusable (like <a>, <input>, <button>, etc.)
+
