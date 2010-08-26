@@ -74,6 +74,26 @@ function nodeIsEditable(node) {
     return node != null;
 }
 
+
+// Function to get HTML properly
+function getHTML() {
+    var root = document.documentElement;
+    if (editor.wholePageEditable) root.removeAttribute("contenteditable");
+    
+    var getHTMLOfNode = function(node) {
+        // FIXME non-standard class
+        return new XMLSerializer().serializeToString(node);
+    }
+    
+    var html =
+        (document.doctype ? getHTMLOfNode(document.doctype)+"\n" : "") +
+        getHTMLOfNode(root);
+    
+    if (editor.wholePageEditable) root.contentEditable = true;
+    return html;
+}
+
+
 // Cursor move detection
 var lastNode = null;
 var i = 0;

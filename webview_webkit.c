@@ -152,8 +152,7 @@ void webview_load(WebView *webview, const gchar *url, const gchar *content,
 
 
 gchar *webview_getHTML(WebView *webview) {
-    // TODO get entire source here, including the <html> tags and the doctype
-    return webview_executeExpression(webview, "document.documentElement.innerHTML");
+    return webview_executeExpression(webview, "getHTML()");
 }
 
 
