@@ -23,6 +23,7 @@
 */
 
 #include <locale.h>
+#include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
 #include "controller.h"
@@ -251,14 +252,35 @@ static void setAction(const gchar *actionName,
 
 
 int main(int argc, char **argv) {
+    GError *error = NULL;
+    static gchar **paths = NULL;
+    static const GOptionEntry entries[] = {
+        { G_OPTION_REMAINING, 0, G_OPTION_FLAG_FILENAME,
+          G_OPTION_ARG_FILENAME_ARRAY, &paths, NULL, "DIRECTORY" },
+        { NULL, 0, 0, 0, NULL, NULL, NULL, }
+    };
+    
+    // Parse options
+    GOptionContext *context = g_option_context_new("");
+    g_option_context_set_summary(context, "Edit web sites");
+    g_option_context_add_main_entries(context, entries, NULL);
+    g_option_context_add_group(context, gtk_get_option_group(TRUE));
+    if (!g_option_context_parse(context, &argc, &argv, &error)) {
+        g_printf("%s\n", error->message);
+        exit(2);
+    }
+    
+    if (paths && paths[0] && paths[1]) {
+        g_printf("More than one project directory specified\n");
+        exit(2);
+    }
+    
     // Initialize locale and GTK
     setlocale(LC_ALL, "");
     gtk_init(&argc, &argv);
     
     // Load the user interface
     builder = gtk_builder_new();
-    GError *error = NULL;
-    
     if (!gtk_builder_add_from_file(builder, "interface.xml", &error)) {
         g_error("Failed to open GtkBuilder XML: %s\n", error->message);
     }
@@ -323,9 +345,8 @@ int main(int argc, char **argv) {
     
     g_signal_connect(main_window, "delete-event", gtk_main_quit, NULL);
     
-    // Load project
-    // TODO use path from command line
-    controller_setProjectPath("test/");
+    // Load project on command line, if any
+    controller_setProjectPath(paths ? paths[0] : NULL);
     
     // Show window
     gtk_widget_show(main_window);
