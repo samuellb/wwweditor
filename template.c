@@ -117,28 +117,29 @@ static void parseMarkers(MarkerList *markers, const gchar *html) {
             printf("    %d {%.*s}\n", token.type, token.dataLength, token.data);
         }
         
-        if (!marker) {
-            // Look for markers
-            size_t nameLength;
-            const gchar *name = getSpecialComment(&token, &state, &nameLength);
-            if (name) {
-                // Found <!--@section--> comment
-                marker = addMarker(markers);
-                marker->name = name;
-                marker->nameLength = nameLength;
-                marker->startTag = state.openTags[state.level-1].data;
-                marker->content = prevTagEnd;
-                marker->contentLength = 0;
-            } else if (token.type == Token_StartTag && token.tag == Tag_title) {
-                // Found a title tag (implicit marker)
-                marker = addMarker(markers);
-                marker->name = "<title>";
-                marker->nameLength = 7;
-                marker->startTag = state.openTags[state.level-1].data;
-                marker->content = html;
-                marker->contentLength = 0;
-            }
-        } else if (isTagClosed(&state, marker)) {
+        // Look for section markers.
+        //
+        // If a section is already open and an inner section encountered
+        // then the inner section will be used in place of the old one.
+        size_t nameLength;
+        const gchar *name = getSpecialComment(&token, &state, &nameLength);
+        if (name) {
+            // Found <!--@section--> comment
+            if (!marker) marker = addMarker(markers);
+            marker->name = name;
+            marker->nameLength = nameLength;
+            marker->startTag = state.openTags[state.level-1].data;
+            marker->content = prevTagEnd;
+            marker->contentLength = 0;
+        } else if (token.type == Token_StartTag && token.tag == Tag_title) {
+            // Found a title tag (implicit marker)
+            if (!marker) marker = addMarker(markers);
+            marker->name = "<title>";
+            marker->nameLength = 7;
+            marker->startTag = state.openTags[state.level-1].data;
+            marker->content = html;
+            marker->contentLength = 0;
+        } else if (marker && isTagClosed(&state, marker)) {
             // Finish the marker
             marker->contentLength = prevTokenEnd - marker->content;
             fprintf(stderr, "tag closed! >%.*s<\n", marker->nameLength, marker->name);
