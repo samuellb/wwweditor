@@ -8,7 +8,7 @@
         <property name="sensitive">False</property>
         <child>
           <object class="GtkAction" id="NewPage">
-            <property name="label" translatable="yes">New page</property>
+            <property name="label" translatable="yes">New page...</property>
             <property name="short_label" translatable="yes">New</property>
             <property name="stock_id">gtk-new</property>
           </object>
@@ -52,19 +52,19 @@
         </child>
         <child>
           <object class="GtkAction" id="Quit">
-            <property name="label" translatable="yes">Quit</property>
+            <property name="label" translatable="yes">_Quit</property>
             <property name="stock_id">gtk-quit</property>
           </object>
           <accelerator key="q" modifiers="GDK_CONTROL_MASK"/>
         </child>
         <child>
           <object class="GtkAction" id="OpenProject">
-            <property name="label" translatable="yes">Open project</property>
+            <property name="label" translatable="yes">_Open project...</property>
           </object>
         </child>
         <child>
           <object class="GtkAction" id="NewProject">
-            <property name="label" translatable="yes">New project</property>
+            <property name="label" translatable="yes">_New project...</property>
           </object>
         </child>
         <child>
