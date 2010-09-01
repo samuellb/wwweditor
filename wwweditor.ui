@@ -2,186 +2,110 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkActionGroup" id="project_actions">
-    <property name="sensitive">False</property>
+  <object class="GtkUIManager" id="uiman">
     <child>
-      <object class="GtkAction" id="action_new_page">
-        <property name="label" translatable="yes">New page</property>
-        <property name="short_label" translatable="yes">New</property>
-        <property name="stock_id">gtk-new</property>
-      </object>
-    </child>
-  </object>
-  <object class="GtkActionGroup" id="document_actions">
-    <property name="sensitive">False</property>
-    <child>
-      <object class="GtkAction" id="action_save_page">
-        <property name="label" translatable="yes">Save page</property>
-        <property name="short_label" translatable="yes">Save</property>
-        <property name="stock_id">gtk-save</property>
-      </object>
-      <accelerator key="s" modifiers="GDK_CONTROL_MASK"/>
-    </child>
-  </object>
-  <object class="GtkActionGroup" id="global_actions">
-    <child>
-      <object class="GtkAction" id="action_quit">
-        <property name="label" translatable="yes">Quit</property>
-        <property name="stock_id">gtk-quit</property>
-      </object>
-      <accelerator key="q" modifiers="GDK_CONTROL_MASK"/>
-    </child>
-    <child>
-      <object class="GtkAction" id="action_open_project">
-        <property name="label" translatable="yes">Open project</property>
+      <object class="GtkActionGroup" id="project_actions">
+        <property name="sensitive">False</property>
+        <child>
+          <object class="GtkAction" id="NewPage">
+            <property name="label" translatable="yes">New page</property>
+            <property name="short_label" translatable="yes">New</property>
+            <property name="stock_id">gtk-new</property>
+          </object>
+        </child>
       </object>
     </child>
     <child>
-      <object class="GtkAction" id="action_new_project">
-        <property name="label" translatable="yes">New project</property>
+      <object class="GtkActionGroup" id="document_actions">
+        <property name="sensitive">False</property>
+        <child>
+          <object class="GtkAction" id="SavePage">
+            <property name="label" translatable="yes">Save page</property>
+            <property name="short_label" translatable="yes">Save</property>
+            <property name="stock_id">gtk-save</property>
+          </object>
+          <accelerator key="s" modifiers="GDK_CONTROL_MASK"/>
+        </child>
       </object>
     </child>
+    <child>
+      <object class="GtkActionGroup" id="global_actions">
+        <child>
+          <object class="GtkAction" id="Project">
+            <property name="label" translatable="yes">_Project</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="Edit">
+            <property name="label" translatable="yes">_Edit</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="View">
+            <property name="label" translatable="yes">_View</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="Help">
+            <property name="label" translatable="yes">_Help</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="Quit">
+            <property name="label" translatable="yes">Quit</property>
+            <property name="stock_id">gtk-quit</property>
+          </object>
+          <accelerator key="q" modifiers="GDK_CONTROL_MASK"/>
+        </child>
+        <child>
+          <object class="GtkAction" id="OpenProject">
+            <property name="label" translatable="yes">Open project</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="NewProject">
+            <property name="label" translatable="yes">New project</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="About">
+            <property name="label" translatable="yes">About</property>
+            <property name="stock_id">gtk-about</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <ui>
+      <menubar name="menubar1">
+        <menu action="Project">
+          <menuitem action="NewProject" />
+          <menuitem action="OpenProject" />
+          <separator />
+          <menuitem action="NewPage" />
+          <menuitem action="SavePage" />
+          <separator />
+          <menuitem action="Quit" />
+        </menu>
+        <menu action="Edit">
+<!--          <menuitem action="Cut" />
+          <menuitem action="Copy" />
+          <menuitem action="Paste" />
+          <menuitem action="Delete" />-->
+        </menu>
+        <menu action="View">
+        </menu>
+        <menu action="Help">
+          <menuitem action="About" />
+        </menu>
+      </menubar>
+    </ui>
   </object>
   <object class="GtkWindow" id="main_window">
     <child>
-      <object class="GtkVBox" id="vbox1">
+      <object class="GtkVBox" id="main_box">
         <property name="visible">True</property>
         <child>
-          <object class="GtkMenuBar" id="menubar">
-            <property name="visible">True</property>
-            <child>
-              <object class="GtkMenuItem" id="menu_file">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">_File</property>
-                <property name="use_underline">True</property>
-                <child type="submenu">
-                  <object class="GtkMenu" id="file_menu">
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkImageMenuItem" id="menu_new_project">
-                        <property name="visible">True</property>
-                        <property name="related_action">action_new_project</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="menu_open_project">
-                        <property name="visible">True</property>
-                        <property name="related_action">action_open_project</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkSeparatorMenuItem" id="menuitem5">
-                        <property name="visible">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="menu_new_page">
-                        <property name="visible">True</property>
-                        <property name="related_action">action_new_page</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="menu_save_page">
-                        <property name="visible">True</property>
-                        <property name="related_action">action_save_page</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkSeparatorMenuItem" id="separatormenuitem1">
-                        <property name="visible">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="menu_quit">
-                        <property name="visible">True</property>
-                        <property name="related_action">action_quit</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem" id="menu_edit">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">_Edit</property>
-                <property name="use_underline">True</property>
-                <child type="submenu">
-                  <object class="GtkMenu" id="edit_menu">
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkImageMenuItem" id="menu_cut">
-                        <property name="label">gtk-cut</property>
-                        <property name="visible">True</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="menu_copy">
-                        <property name="label">gtk-copy</property>
-                        <property name="visible">True</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="menu_paste">
-                        <property name="label">gtk-paste</property>
-                        <property name="visible">True</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="menu_delete">
-                        <property name="label">gtk-delete</property>
-                        <property name="visible">True</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem" id="menu_view">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">_View</property>
-                <property name="use_underline">True</property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem" id="menu_help">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">_Help</property>
-                <property name="use_underline">True</property>
-                <child type="submenu">
-                  <object class="GtkMenu" id="help_menu">
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkImageMenuItem" id="menu_about">
-                        <property name="label">gtk-about</property>
-                        <property name="visible">True</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-          </object>
+          <object class="GtkMenuBar" id="menubar1" constructor="uiman"/>
           <packing>
             <property name="expand">False</property>
             <property name="position">0</property>

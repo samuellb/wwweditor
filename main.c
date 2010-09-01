@@ -281,8 +281,8 @@ int main(int argc, char **argv) {
     
     // Load the user interface
     builder = gtk_builder_new();
-    if (!gtk_builder_add_from_file(builder, "interface.xml", &error)) {
-        g_error("Failed to open GtkBuilder XML: %s\n", error->message);
+    if (!gtk_builder_add_from_file(builder, "wwweditor.ui", &error)) {
+        g_error("Failed to open GtkBuilder file: %s\n", error->message);
     }
     
     // Prepare WebKit
@@ -298,7 +298,7 @@ int main(int argc, char **argv) {
     documentActions = GTK_ACTION_GROUP(gtk_builder_get_object(builder, "document_actions"));
     
     // TODO set up handlers here
-    setAction("action_save_page", actionSavePage);
+    setAction("SavePage", actionSavePage);
     
     // Prepare file tree
     GtkTreeView *fileTreeView = GTK_TREE_VIEW(gtk_builder_get_object(builder, "file_tree_view"));
