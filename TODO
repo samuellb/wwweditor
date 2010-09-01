@@ -16,6 +16,8 @@ Projects:
       (whether it's a template, and the template filename if any)
   [ ] Project file loading/saving
   [ ] Project loading in the UI
+      [ ] Initialize a "new" project when there's no project file and import
+          all .html (and image/stylesheet/javascript/related) files
   [X] Populating the file list
   [ ] Adding/removing files
   [X] Template editing. Make <body> an implicitly editable section?
