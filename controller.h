@@ -40,7 +40,7 @@ void controller_loadDocument(const gchar *uri);
 void controller_saveDocument();
 void controller_closeDocument();
 
-gboolean controller_canExit();
+void controller_quit();
 FileInfo *controller_getFileInfo(const gchar *uri);
 void controller_freeFileInfo(FileInfo *status);
 
@@ -50,6 +50,8 @@ void view_showDirectory(const gchar *path);
 void view_showDocument(const gchar *fileURL, const gchar *html,
                        gboolean wholePageEditable);
 gchar *view_getDocumentHTML();
+
+void view_quit();
 
 
 #endif

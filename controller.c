@@ -91,8 +91,10 @@ void controller_closeDocument() {
 
 
 
-gboolean controller_canExit() {
-    return askSave();
+void controller_quit() {
+    if (askSave()) {
+        view_quit();
+    }
 }
 
 

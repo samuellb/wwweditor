@@ -239,8 +239,24 @@ gchar *view_getDocumentHTML() {
 }
 
 
+void view_quit() {
+    gtk_main_quit();
+}
+
+
+static gboolean windowClose(GtkWidget *window, GdkEventAny *event) {
+    controller_quit();
+    return TRUE;
+}
+
+
 static void actionSavePage(GtkAction *action, gpointer user_data) {
     controller_saveDocument();
+}
+
+
+static void actionQuit(GtkAction *action, gpointer user_data) {
+    controller_quit();
 }
 
 
@@ -299,6 +315,7 @@ int main(int argc, char **argv) {
     
     // TODO set up handlers here
     setAction("SavePage", actionSavePage);
+    setAction("Quit", actionQuit);
     
     // Prepare file tree
     GtkTreeView *fileTreeView = GTK_TREE_VIEW(gtk_builder_get_object(builder, "file_tree_view"));
@@ -343,7 +360,7 @@ int main(int argc, char **argv) {
     link_href_entry = GTK_WIDGET(gtk_builder_get_object(builder, "link_href_entry"));
     link_title_entry = GTK_WIDGET(gtk_builder_get_object(builder, "link_title_entry"));
     
-    g_signal_connect(main_window, "delete-event", gtk_main_quit, NULL);
+    g_signal_connect(main_window, "delete-event", G_CALLBACK(windowClose), NULL);
     
     // Load project on command line, if any
     controller_setProjectPath(paths ? paths[0] : NULL);
