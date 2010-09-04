@@ -33,13 +33,14 @@ typedef struct {
 } FileInfo;
 
 // Controller functions
-void controller_setProjectPath(const gchar *path);
+gboolean controller_setProjectPath(const gchar *path);
 
 void controller_newDocument(const gchar *uri, const gchar *templateURI);
 void controller_loadDocument(const gchar *uri);
 void controller_saveDocument();
 void controller_closeDocument();
 
+gboolean controller_askSave();
 void controller_quit();
 FileInfo *controller_getFileInfo(const gchar *uri);
 void controller_freeFileInfo(FileInfo *status);

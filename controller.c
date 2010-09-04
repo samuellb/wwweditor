@@ -33,27 +33,39 @@ static gchar *activeDocument = NULL;
 static gchar *activeTemplate = NULL;
 
 
-static gboolean askSave() {
+gboolean controller_askSave() {
     // TODO show "Do you want to save?" dialog
     return TRUE;
 }
 
-static gboolean askSaveAndClose() {
-    if (!askSave()) return FALSE;
+static void freeDocument() {
     g_free(activeDocument);
     g_free(activeTemplate);
     activeDocument = NULL;
     activeTemplate = NULL;
-    return TRUE;
 }
 
 
-void controller_setProjectPath(const gchar *path) {
-    if (!askSaveAndClose()) return;
-    view_showDocument(NULL, NULL, FALSE);
+gboolean controller_setProjectPath(const gchar *path) {
+    if (!controller_askSave()) return FALSE;
     
-    activeProject = (path ? project_init(path) : NULL);
+    Project *project = NULL;
+    if (path) {
+        project = project_init(path);
+        if (!project) {
+            // TODO display an error message here
+            return FALSE;
+        }
+    }
+    
+    // Free previous project
+    freeDocument();
+    activeProject = project;
+    
+    // Update view
     view_showDirectory(path);
+    view_showDocument(NULL, NULL, FALSE);
+    return (path == NULL || activeProject != NULL);
 }
 
 
@@ -63,15 +75,27 @@ void controller_newDocument(const gchar *uri, const gchar *templateURI) {
 
 
 void controller_loadDocument(const gchar *uri) {
-    if (!askSaveAndClose()) return;
+    if (!controller_askSave()) return;
     
+    // Try to load the page
+    gchar *html = project_loadPage(activeProject, uri);
+    if (!html) {
+        // TODO show error message
+        return;
+    }
+    
+    // Free the previous document
+    freeDocument();
+    
+    // Make the new page the current page
     activeDocument = g_strdup(uri);
     activeTemplate = project_getTemplateURI(activeProject, uri);
     
-    gchar *html = project_loadPage(activeProject, uri);
+    // Update the view
     gchar *fileURL = project_getFileURL(activeProject, uri);
     gboolean wholePageEditable = (activeTemplate == NULL);
     view_showDocument(fileURL, html, wholePageEditable);
+    
     g_free(fileURL);
     g_free(html);
 }
@@ -85,14 +109,19 @@ void controller_saveDocument() {
 
 
 void controller_closeDocument() {
-    if (!askSaveAndClose()) return;
+    if (!controller_askSave()) return;
+    
+    // Close document
+    freeDocument();
+    
+    // Update view
     view_showDocument(NULL, NULL, FALSE);
 }
 
 
 
 void controller_quit() {
-    if (askSave()) {
+    if (controller_askSave()) {
         view_quit();
     }
 }

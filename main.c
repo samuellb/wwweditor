@@ -251,6 +251,34 @@ static gboolean windowClose(GtkWidget *window, GdkEventAny *event) {
 }
 
 
+static void actionOpenProject(GtkAction *action, gpointer user_data) {
+    // TODO Refactor this function into a view and controller part?
+    controller_askSave();
+    
+    GtkWidget *dialog = gtk_file_chooser_dialog_new(
+        "Select project folder", GTK_WINDOW(main_window),
+        GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+        GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+        NULL);
+    
+  keep_dialog_open: ;
+    GtkResponseType response = gtk_dialog_run(GTK_DIALOG(dialog));
+    
+    if (response == GTK_RESPONSE_ACCEPT) {
+        gchar *dir = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        gboolean success = FALSE;
+        if (dir) {
+            success = controller_setProjectPath(dir);
+            g_free(dir);
+        }
+        if (!success) goto keep_dialog_open;
+    }
+    
+    gtk_widget_destroy(dialog);
+}
+
+
 static void actionSavePage(GtkAction *action, gpointer user_data) {
     controller_saveDocument();
 }
@@ -315,6 +343,8 @@ int main(int argc, char **argv) {
     documentActions = GTK_ACTION_GROUP(gtk_builder_get_object(builder, "document_actions"));
     
     // TODO set up handlers here
+    // merge open and save?
+    setAction("OpenProject", actionOpenProject);
     setAction("SavePage", actionSavePage);
     setAction("Quit", actionQuit);
     
