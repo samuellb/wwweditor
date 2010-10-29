@@ -115,10 +115,8 @@ static void elementTypeSelected(GtkTreeView *tree_view, GtkTreePath *path,
     gtk_tree_model_get(model, &iter, ElementColumn_TagName, &tagName, -1);
     
     fprintf(stderr, "selected %s!\n", tagName);
-    gchar *script = g_strdup_printf("setElementType('%s');", tagName);
-    webview_executeScript(webview, script);
+    webview_executeFormattedScript(webview, "setElementType('%s');", tagName);
     
-    g_free(script);
     g_free(tagName);
 }
 
