@@ -39,7 +39,12 @@ Editor (C):
   [X] Clean up some aspects of the code live
   [ ] Javascript plugins/extensions?
   [ ] Dirty change detection
+  [ ] Restore the selection after the element type is changed
 
 Editor (JS):
   [ ] Make non-editable elements non-focusable (like <a>, <input>, <button>, etc.)
+
+User interface:
+  [ ] Restore window size and position. Should be saved per computer/hostname
+      in case they have different screen sizes.
 
