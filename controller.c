@@ -42,6 +42,11 @@ static void freeDocument() {
 
 
 static void updateDirectoryView() {
+    if (!activeProject) {
+        view_showDirectory(NULL);
+        return;
+    }
+    
     // Refresh file state
     project_refresh(activeProject);
     
