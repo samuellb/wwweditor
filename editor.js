@@ -217,5 +217,8 @@ document.documentElement.addEventListener("DOMSubtreeModified", subtreeModified,
 document.documentElement.addEventListener("keypress", handleBackspace, true);
 document.documentElement.addEventListener("keyup", handleBackspace, true);
 
+if (editableElements.length > 0) {
+    editableElements[0].focus();
+}
 
 
