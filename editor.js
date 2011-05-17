@@ -34,9 +34,15 @@ Array.prototype.contains = function(elem) { return this.indexOf(elem) != -1; };
 // Make marked sections editable
 var editableElements = [];
 
-function makeNodeEditable(node) {
+function makeNodeEditable(node, marker) {
     node.contentEditable = true;
+    node.setAttribute("wwweditor:marker", marker);
     editableElements.push(node);
+}
+
+function isMarkerComment(node) {
+    return (node.nodeType == Node.COMMENT_NODE &&
+            node.nodeValue.search(/^\s*@\s*/) == 0);
 }
 
 function makeMarkedEditable(obj) {
@@ -47,15 +53,41 @@ function makeMarkedEditable(obj) {
             continue;
         
         // Look for special comments in the beginning
-        if (node.nodeType == Node.COMMENT_NODE && inBeginning) {
-            if (node.nodeValue.search(/^\s*@\s*/) == 0) {
-                makeNodeEditable(node.parentNode);
-            }
+        if (inBeginning && isMarkerComment(node)) {
+            var marker = node.nodeValue;
+            makeNodeEditable(node.parentNode, marker);
         }
         inBeginning = false;
         
         // Process recursively
         makeMarkedEditable(node);
+    }
+}
+
+
+function checkMarkers() {
+    for (var i = 0; i < editableElements.length; i++) {
+        var obj = editableElements[i];
+        
+        var hasMarker = false;
+        for (var node = obj.firstChild; node != null; node = node.nextSibling) {
+            // Skip empty text nodes
+            if (node.nodeType == Node.TEXT_NODE && node.nodeValue.search(/^\s*$/) == 0)
+                continue;
+            
+            // Look for special comments in the beginning
+            if (isMarkerComment(node)) {
+                hasMarker = true;
+            }
+            
+            break; // Reached a tag or a comment
+        }
+        
+        if (!hasMarker) {
+            // Marker is gone!
+            var marker = document.createComment(obj.getAttribute("wwweditor:marker"));
+            obj.insertBefore(marker, obj.firstChild);
+        }
     }
 }
 
@@ -79,6 +111,9 @@ function nodeIsEditable(node) {
 function getHTML() {
     var root = document.documentElement;
     if (editor.wholePageEditable) root.removeAttribute("contenteditable");
+    
+    // Put back the marker comments if they are missing
+    checkMarkers();
     
     // FIXME non-standard class
     var html = new XMLSerializer().serializeToString(document);
