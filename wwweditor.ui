@@ -101,6 +101,8 @@
     </ui>
   </object>
   <object class="GtkWindow" id="main_window">
+    <property name="default_width">750</property>
+    <property name="default_height">500</property>
     <child>
       <object class="GtkVBox" id="main_box">
         <property name="visible">True</property>
@@ -128,6 +130,7 @@
               <object class="GtkHPaned" id="hpaned2">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="position">180</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow1">
                     <property name="visible">True</property>
