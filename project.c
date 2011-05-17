@@ -23,12 +23,17 @@
 */
 
 #include <string.h>
+#include <glib/gprintf.h>
 #include "template.h"
 
 #include "project.h"
 
 struct Project_ {
+    // Path to root directory
     gchar *path;
+    
+    // File states in GIT
+    GData *fileStates;
 };
 
 
@@ -36,6 +41,9 @@ Project *project_init(const gchar *path) {
     Project *project = g_malloc(sizeof(Project));
     project->path = (g_str_has_suffix(path, "/") ?
         g_strdup(path) : g_strconcat(path, "/", NULL));
+    project->fileStates = NULL;
+    
+    project_refresh(project);
     return project;
 }
 
@@ -43,6 +51,95 @@ Project *project_init(const gchar *path) {
 void project_free(Project *project) {
     g_free(project->path);
     g_free(project);
+}
+
+
+static FileState gitStateToFileState(gchar x, gchar y) {
+    switch (y) {
+        case '?': return FileState_Unknown;
+        case 'A': return FileState_Added;
+        case 'C': return FileState_Copied;
+        case 'D': return FileState_Deleted;
+        case 'M': return FileState_Modified;
+        case 'R': return FileState_Renamed;
+        default: return FileState_Unmodified;
+    }
+}
+
+void project_refresh(Project *project) {
+    // Clear the file state list
+    g_datalist_clear(&project->fileStates);
+    g_datalist_init(&project->fileStates);
+    
+    // Read state from GIT
+    
+    // Spawn process: "git status --porcelain -z"
+    static gchar *argv[] = { "git", "status", "--porcelain", "-z", NULL };
+    GPid pid;
+    gint output_fd;
+    GError *error = NULL;
+    
+    if (!g_spawn_async_with_pipes(project->path, argv, NULL,
+                       G_SPAWN_SEARCH_PATH | G_SPAWN_STDERR_TO_DEV_NULL,
+                       NULL, NULL, &pid,
+                       NULL, &output_fd, NULL, // pipes
+                       &error)) {
+        // TODO better error message
+        g_fprintf(stderr, "failed to spawn process!\n");
+        g_error_free(error);
+        return;
+    }
+    
+    // Create an IO channel so we can read from the output fd
+    GIOChannel *chan = g_io_channel_unix_new(output_fd);
+    if (!chan) {
+        // TODO better error message
+        g_fprintf(stderr, "failed to create IO channel!\n");
+        g_spawn_close_pid(pid);
+        return;
+    }
+    
+    // Read the output
+    error = NULL;
+    gchar *data;
+    gsize length;
+    if (!g_io_channel_read_to_end(chan, &data, &length, &error)) {
+        // TODO better error message
+        g_fprintf(stderr, "failed to read from pipe!\n");
+    }
+    
+    // Parse
+    gchar *end = data + length;
+    gchar *p = data;
+    while (p && p != end && *p) {
+        gsize entrylen = strlen(p);
+        if (entrylen < 4) continue;
+        
+        // Parse status
+        gchar x = p[0];
+        gchar y = p[1];
+        FileState state = gitStateToFileState(x, y);
+        if (p[2] != ' ') continue;
+        
+        // Parse filename
+        if (p[entrylen-1] == '/') p[entrylen-1] = '\0'; // remove trailing /
+        p += 3;
+        g_fprintf(stderr, "add filename >%s< = %d\n", p, state);
+        g_datalist_set_data(&project->fileStates, p, (gpointer)state);
+        
+        p += entrylen - 3 + 1;
+    }
+    
+    g_free(data);
+    g_io_channel_unref(chan);
+    
+    // Clean up
+    g_spawn_close_pid(pid);
+}
+
+
+const gchar *project_getPath(const Project *project) {
+    return project->path;
 }
 
 
@@ -78,6 +175,16 @@ gboolean project_isTemplate(const Project *project, const gchar *uri) {
 
 gchar *project_getTemplateURI(const Project *project, const gchar *uri) {
     return g_strdup(!strcmp(uri, templateURI) ? NULL : templateURI);
+}
+
+
+FileState project_getFileState(Project *project, const gchar *uri) {
+    // Skip leading / because it's not present in local paths,
+    // for example from "git status"
+    if (uri[0] == '/') uri++;
+    
+    g_printf("looking up >%s<\n", uri);
+    return (FileState)g_datalist_get_data(&project->fileStates, uri);
 }
 
 

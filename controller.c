@@ -41,6 +41,16 @@ static void freeDocument() {
 }
 
 
+static void updateDirectoryView() {
+    // Refresh file state
+    project_refresh(activeProject);
+    
+    // Update tree view
+    const gchar *path = project_getPath(activeProject);
+    view_showDirectory(path);
+}
+
+
 gboolean controller_setProjectPath(const gchar *path) {
     controller_saveDocument();
     
@@ -58,7 +68,7 @@ gboolean controller_setProjectPath(const gchar *path) {
     activeProject = project;
     
     // Update view
-    view_showDirectory(path);
+    updateDirectoryView();
     view_showDocument(NULL, NULL, FALSE);
     return (path == NULL || activeProject != NULL);
 }
@@ -101,6 +111,9 @@ void controller_saveDocument() {
         gchar *html = view_getDocumentHTML();
         project_savePage(activeProject, activeDocument, html);
         g_free(html);
+        
+        // TODO update only the modified file!
+        updateDirectoryView();
     }
 }
 
@@ -127,6 +140,7 @@ FileInfo *controller_getFileInfo(const gchar *uri) {
     FileInfo *info = g_malloc(sizeof(FileInfo));
     info->isTemplate = project_isTemplate(activeProject, uri);
     info->templateURI = project_getTemplateURI(activeProject, uri);
+    info->state = project_getFileState(activeProject, uri);
     return info;
 }
 

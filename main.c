@@ -47,10 +47,23 @@ static GtkTreeStore *fileTree;
 
 typedef enum {
     FileColumn_Icon = 0,
+    FileColumn_FileState,
     FileColumn_DisplayName,
     FileColumn_URI,
     FileColumn_IsDirectory,
 } FileTreeColumnId;
+
+static const char *stateIcons[] = {
+    // TODO use better icons
+    NULL,               // Unmodified
+    GTK_STOCK_EDIT,     // Modified
+    //GTK_STOCK_INDEX,  // Renamed
+    GTK_STOCK_JUMP_TO,  // Renamed
+    GTK_STOCK_COPY,     // Copied
+    GTK_STOCK_ADD,      // Added
+    GTK_STOCK_REMOVE,   // Removed
+    GTK_STOCK_ADD,      // Unknown to GIT
+};
 
 // Web view
 static WebView *webview;
@@ -189,21 +202,26 @@ static void addDirectory(GtkTreeIter *parent,
         gchar *filename = g_build_filename(path, entry, NULL);
         gchar *uri = g_build_path("/", baseUri, entry, NULL);
         const gchar *icon;
+        FileState fileState;
         gboolean isDir = g_file_test(filename, G_FILE_TEST_IS_DIR);
         if (isDir) {
             // Add subdirectories
             addDirectory(&iter, filename, uri);
             icon = ICON_DIR;
+            fileState = FileState_Unmodified; // TODO should be modified if dir contents have been modified or if the directory is unknown to GIT
         } else {
             FileInfo *info = controller_getFileInfo(uri);
             if (info->isTemplate) icon = ICON_TEMPLATE;
             else if (info->templateURI) icon = ICON_PAGE;
             else icon = ICON_OTHER;
+            fileState = info->state;
+            
             controller_freeFileInfo(info);
         }
         
         gtk_tree_store_set(fileTree, &iter,
                            FileColumn_Icon, icon,
+                           FileColumn_FileState, stateIcons[fileState],
                            FileColumn_DisplayName, entry,
                            FileColumn_URI, uri,
                            FileColumn_IsDirectory, isDir,
@@ -351,10 +369,17 @@ int main(int argc, char **argv) {
     fileTree = GTK_TREE_STORE(gtk_builder_get_object(builder, "file_tree"));
     
     GtkTreeViewColumn *fileColumn = gtk_tree_view_column_new();
+    
     GtkCellRenderer *iconRenderer = GTK_CELL_RENDERER(gtk_cell_renderer_pixbuf_new());
     gtk_tree_view_column_pack_start(fileColumn, iconRenderer, FALSE);
     gtk_tree_view_column_add_attribute(fileColumn, iconRenderer,
         "stock-id", FileColumn_Icon);
+    
+    GtkCellRenderer *stateRenderer = GTK_CELL_RENDERER(gtk_cell_renderer_pixbuf_new());
+    gtk_tree_view_column_pack_start(fileColumn, stateRenderer, FALSE);
+    gtk_tree_view_column_add_attribute(fileColumn, stateRenderer,
+        "stock-id", FileColumn_FileState);
+    
     GtkCellRenderer *filenameRenderer = GTK_CELL_RENDERER(gtk_cell_renderer_text_new());
     gtk_tree_view_column_pack_start(fileColumn, filenameRenderer, TRUE);
     gtk_tree_view_column_add_attribute(fileColumn, filenameRenderer,

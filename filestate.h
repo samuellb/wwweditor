@@ -1,6 +1,6 @@
 /*
 
-  Copyright (c) 2010 Samuel Lidén Borell <samuel@slbdata.se>
+  Copyright (c) 2011 Samuel Lidén Borell <samuel@slbdata.se>
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -22,39 +22,18 @@
 
 */
 
-#ifndef CONTROLLER_H
-#define CONTROLLER_H
+#ifndef FILESTATE_H
+#define FILESTATE_H
 
-#include <glib.h>
-#include "filestate.h"
-
-typedef struct {
-    gboolean isTemplate;
-    gchar *templateURI;
-    FileState state;
-} FileInfo;
-
-// Controller functions
-gboolean controller_setProjectPath(const gchar *path);
-
-void controller_newDocument(const gchar *uri, const gchar *templateURI);
-void controller_loadDocument(const gchar *uri);
-void controller_saveDocument();
-void controller_closeDocument();
-
-void controller_quit();
-FileInfo *controller_getFileInfo(const gchar *uri);
-void controller_freeFileInfo(FileInfo *status);
-
-
-// These functions must be provided by the view
-void view_showDirectory(const gchar *path);
-void view_showDocument(const gchar *fileURL, const gchar *html,
-                       gboolean wholePageEditable);
-gchar *view_getDocumentHTML();
-
-void view_quit();
-
+typedef enum {
+    FileState_Unmodified,
+    FileState_Modified,
+    FileState_Renamed,
+    FileState_Copied,
+    FileState_Added,
+    FileState_Deleted,
+    FileState_Unknown,
+} FileState;
 
 #endif
 

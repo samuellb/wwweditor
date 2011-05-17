@@ -379,6 +379,8 @@
     <columns>
       <!-- column-name icon -->
       <column type="gchararray"/>
+      <!-- column-name file_state -->
+      <column type="gchararray"/>
       <!-- column-name display_name -->
       <column type="gchararray"/>
       <!-- column-name uri -->

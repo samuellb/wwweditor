@@ -26,15 +26,21 @@
 #define PROJECT_H
 
 #include <glib.h>
+#include "filestate.h"
 
 typedef struct Project_ Project;
 
 Project *project_init(const gchar *path);
 void project_free(Project *project);
+void project_refresh(Project *project);
+
+const gchar *project_getPath(const Project *project);
 
 gboolean project_isTemplate(const Project *project, const gchar *uri);
 gchar *project_getTemplateURI(const Project *project, const gchar *uri);
+FileState project_getFileState(Project *project, const gchar *uri);
 gchar *project_getFileURL(const Project *project, const gchar *uri);
+
 gchar *project_loadPage(const Project *project, const gchar *uri);
 gboolean project_savePage(Project *project, const gchar *uri, const gchar *html);
 
