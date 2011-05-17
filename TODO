@@ -38,7 +38,6 @@ Editor (C):
   [ ] Clean up the code (indentation, remove Apple-style-span, <h3><span style="font-...: normal">, etc.)
   [X] Clean up some aspects of the code live
   [ ] Javascript plugins/extensions?
-  [ ] Dirty change detection
   [ ] Restore the selection after the element type is changed
 
 Editor (JS):

@@ -33,11 +33,6 @@ static gchar *activeDocument = NULL;
 static gchar *activeTemplate = NULL;
 
 
-gboolean controller_askSave() {
-    // TODO show "Do you want to save?" dialog
-    return TRUE;
-}
-
 static void freeDocument() {
     g_free(activeDocument);
     g_free(activeTemplate);
@@ -47,7 +42,7 @@ static void freeDocument() {
 
 
 gboolean controller_setProjectPath(const gchar *path) {
-    if (!controller_askSave()) return FALSE;
+    controller_saveDocument();
     
     Project *project = NULL;
     if (path) {
@@ -75,7 +70,7 @@ void controller_newDocument(const gchar *uri, const gchar *templateURI) {
 
 
 void controller_loadDocument(const gchar *uri) {
-    if (!controller_askSave()) return;
+    controller_saveDocument();
     
     // Try to load the page
     gchar *html = project_loadPage(activeProject, uri);
@@ -102,14 +97,16 @@ void controller_loadDocument(const gchar *uri) {
 
 
 void controller_saveDocument() {
-    gchar *html = view_getDocumentHTML();
-    project_savePage(activeProject, activeDocument, html);
-    g_free(html);
+    if (activeProject && activeDocument) {
+        gchar *html = view_getDocumentHTML();
+        project_savePage(activeProject, activeDocument, html);
+        g_free(html);
+    }
 }
 
 
 void controller_closeDocument() {
-    if (!controller_askSave()) return;
+    controller_saveDocument();
     
     // Close document
     freeDocument();
@@ -121,9 +118,8 @@ void controller_closeDocument() {
 
 
 void controller_quit() {
-    if (controller_askSave()) {
-        view_quit();
-    }
+    controller_saveDocument();
+    view_quit();
 }
 
 

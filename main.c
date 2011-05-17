@@ -251,7 +251,7 @@ static gboolean windowClose(GtkWidget *window, GdkEventAny *event) {
 
 static void actionOpenProject(GtkAction *action, gpointer user_data) {
     // TODO Refactor this function into a view and controller part?
-    controller_askSave();
+    controller_saveDocument();
     
     GtkWidget *dialog = gtk_file_chooser_dialog_new(
         "Select project folder", GTK_WINDOW(main_window),
