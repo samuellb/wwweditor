@@ -4,7 +4,7 @@ Parser(?):
         g_utf8_validate(s, NULL, NULL)
         conversion?
   [ ] How are comment handled in raw/rc-data?
-  [ ] Fix long comments with ">" inside.
+  [X] Fix long comments with ">" inside.
 
 Templates:
   [X] Implement template markers completely

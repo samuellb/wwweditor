@@ -397,7 +397,15 @@ gboolean tokenizer_readToken(const gchar **html, Token *token) {
         // TODO handle [CDATA[ in "in foreign content" insertion mode
         token->type = Token_Comment;
         token->data = *html;
-        while (**html && **html != '>') { (*html)++; }
+        if (strncmp(*html, "!--", 3) == 0) {
+            // <!--x-->
+            *html += 3;
+            const gchar *end = strstr(*html, "-->");
+            *html = (end ? end+2 : *html+strlen(*html));
+        } else {
+            // <!x> or <?x>
+            while (**html && **html != '>') { (*html)++; }
+        }
         token->dataLength = *html - token->data;
         if (**html == '>') (*html)++;
         return TRUE;
