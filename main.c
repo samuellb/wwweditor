@@ -331,6 +331,13 @@ static void actionOpenProject(GtkAction *action, gpointer user_data) {
 }
 
 
+static void actionNewPage(GtkAction *action, gpointer user_data) {
+    // Add page
+    // TODO add a counter if the document already exists
+    controller_newDocument("/new_document.html", "<html><head><title>New document</title></head></html>");
+}
+
+
 static void actionSavePage(GtkAction *action, gpointer user_data) {
     controller_saveDocument();
 }
@@ -397,6 +404,7 @@ int main(int argc, char **argv) {
     // TODO set up handlers here
     // merge open and save?
     setAction("OpenProject", actionOpenProject);
+    setAction("NewPage", actionNewPage);
     setAction("SavePage", actionSavePage);
     setAction("Quit", actionQuit);
     

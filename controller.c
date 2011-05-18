@@ -80,6 +80,12 @@ gboolean controller_setProjectPath(const gchar *path) {
 
 
 void controller_newDocument(const gchar *uri, const gchar *templateURI) {
+    project_addPage(activeProject, uri, templateURI);
+    
+    // TODO update only the added file!
+    updateDirectoryView();
+    
+    controller_loadDocument(uri);
 }
 
 

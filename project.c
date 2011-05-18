@@ -237,3 +237,9 @@ gboolean project_savePage(Project *project, const gchar *uri, const gchar *html)
 }
 
 
+gboolean project_addPage(Project *project, const gchar *uri, const gchar *templateURI) {
+    // TODO: set template URI
+    return project_savePage(project, uri, "");
+}
+
+
