@@ -36,7 +36,9 @@ var editableElements = [];
 
 function makeNodeEditable(node, marker) {
     node.contentEditable = true;
-    node.setAttribute("wwweditor:marker", marker);
+    if (marker != null) {
+        node.setAttribute("wwweditor:marker", marker);
+    }
     editableElements.push(node);
 }
 
@@ -85,15 +87,18 @@ function checkMarkers() {
         
         if (!hasMarker) {
             // Marker is gone!
-            var marker = document.createComment(obj.getAttribute("wwweditor:marker"));
-            obj.insertBefore(marker, obj.firstChild);
+            var markerName = obj.getAttribute("wwweditor:marker");
+            if (markerName != null) {
+                var marker = document.createComment(markerName);
+                obj.insertBefore(marker, obj.firstChild);
+            }
         }
     }
 }
 
 
 if (editor.wholePageEditable) {
-    makeNodeEditable(document.documentElement);
+    makeNodeEditable(document.documentElement, null);
 } else {
     makeMarkedEditable(document.documentElement);
 }
