@@ -74,13 +74,12 @@ gboolean controller_setProjectPath(const gchar *path) {
     
     // Update view
     updateDirectoryView();
-    view_showDocument(NULL, NULL, FALSE);
+    view_showDocument(NULL, NULL, NULL, FALSE);
     return (path == NULL || activeProject != NULL);
 }
 
 
 void controller_newDocument(const gchar *uri, const gchar *templateURI) {
-    // TODO
 }
 
 
@@ -104,7 +103,7 @@ void controller_loadDocument(const gchar *uri) {
     // Update the view
     gchar *fileURL = project_getFileURL(activeProject, uri);
     gboolean wholePageEditable = (activeTemplate == NULL);
-    view_showDocument(fileURL, html, wholePageEditable);
+    view_showDocument(fileURL, uri, html, wholePageEditable);
     
     g_free(fileURL);
     g_free(html);
@@ -130,7 +129,7 @@ void controller_closeDocument() {
     freeDocument();
     
     // Update view
-    view_showDocument(NULL, NULL, FALSE);
+    view_showDocument(NULL, NULL, NULL, FALSE);
 }
 
 

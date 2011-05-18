@@ -69,6 +69,10 @@ static const char *stateIcons[] = {
 static WebView *webview;
 static GtkWidget *webview_widget;
 
+// Page properties
+static GtkEntry *filenameEntry;
+static GtkEntry *titleEntry;
+
 // Element properties
 static GtkListStore *elementTypes;
 static GtkTreeView *elementTypesView;
@@ -115,6 +119,26 @@ static void notifyFunction(WebView *view, const WebViewElementInfo *info) {
     gtk_entry_set_text(GTK_ENTRY(link_href_entry), info->linkHref);
     gtk_entry_set_text(GTK_ENTRY(link_title_entry), info->title);
     gtk_widget_set_visible(link_expander, isLink);
+}
+
+
+static void titleChanged(WebView *view, const gchar *title) {
+    // Don't change while the user is editing the title
+    if (!gtk_widget_has_focus(GTK_WIDGET(titleEntry))) {
+        gtk_entry_set_text(titleEntry, title);
+    }
+}
+
+
+/**
+ * Triggered when the text in the title entry is changed.
+ */
+static void titleEntryNotify(GObject *gobject, GParamSpec *pspec, gpointer user_data) {
+    gchar *title;
+    g_object_get(gobject, "text", &title,  NULL);
+    
+    webview_setTitle(webview, title);
+    g_free(title);
 }
 
 
@@ -242,11 +266,23 @@ void view_showDirectory(const gchar *path) {
 }
 
 
-void view_showDocument(const gchar *fileURL, const gchar *html,
+void view_showDocument(const gchar *fileURL,
+                       const gchar *uri, const gchar *html,
                        gboolean wholePageEditable) {
+    // Open the document in the web view
     if (html) webview_load(webview, fileURL, html, wholePageEditable);
     else webview_load(webview, "", "", FALSE);
     
+    if (html) {
+        // Display the filename (the title is displayed after the document has been loaded)
+        gtk_entry_set_text(filenameEntry, (uri[0] == '/' ? uri+1 : uri));
+    } else {
+        // Clear filename and title
+        gtk_entry_set_text(filenameEntry, "");
+        gtk_entry_set_text(titleEntry, "");
+    }
+    
+    // Enable more parts of the interface
     gtk_action_group_set_sensitive(documentActions, (html != NULL));
 }
 
@@ -347,7 +383,7 @@ int main(int argc, char **argv) {
     }
     
     // Prepare WebKit
-    webview = webview_new(notifyFunction);
+    webview = webview_new(notifyFunction, titleChanged);
     webview_widget = webview_getWidget(webview);
     gtk_widget_show(webview_widget);
     
@@ -398,6 +434,10 @@ int main(int argc, char **argv) {
     gtk_container_add(page_container, webview_widget);
     
     // Prepare the right sidebar
+    filenameEntry = GTK_ENTRY(gtk_builder_get_object(builder, "entry_doc_filename"));
+    titleEntry = GTK_ENTRY(gtk_builder_get_object(builder, "entry_doc_title"));
+    g_signal_connect(titleEntry, "notify::text", G_CALLBACK(titleEntryNotify), NULL);
+    
     elementTypesView = GTK_TREE_VIEW(gtk_builder_get_object(builder, "element_types_view"));
     elementTypes = GTK_LIST_STORE(gtk_builder_get_object(builder, "element_types"));
     

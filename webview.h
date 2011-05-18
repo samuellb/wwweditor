@@ -37,8 +37,10 @@ typedef struct {
     char *title;
 } WebViewElementInfo;
 typedef void (*WebViewNotifyFunction)(WebView *view, const WebViewElementInfo *info);
+typedef void (*WebViewTitleChangeFunction)(WebView *view, const gchar *title);
 
-WebView *webview_new(WebViewNotifyFunction notifyFunction);
+WebView *webview_new(WebViewNotifyFunction notifyFunction,
+                     WebViewTitleChangeFunction titleChangeFunction);
 void webview_free(WebView *webview);
 
 GtkWidget *webview_getWidget(WebView *webview);
@@ -46,6 +48,7 @@ GtkWidget *webview_getWidget(WebView *webview);
 void webview_load(WebView *webview, const gchar *url, const gchar *content,
                   gboolean wholePageEditable);
 gchar *webview_getHTML(WebView *webview);
+void webview_setTitle(WebView *webview, const gchar *title);
 
 void webview_executeScript(WebView *webview, const gchar *script);
 void webview_executeFormattedScript(WebView *webview,

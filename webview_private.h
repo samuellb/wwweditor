@@ -30,6 +30,7 @@
 // Common data regardless of implementation
 typedef struct {
     WebViewNotifyFunction notifyFunction;
+    WebViewTitleChangeFunction titleChangeFunction;
     
     // Settings
     gboolean wholePageEditable;

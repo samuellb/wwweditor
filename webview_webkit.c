@@ -70,9 +70,25 @@ static void status_changed(WebKitWebView *widget, const gchar *text, gpointer us
 }
 
 
-WebView *webview_new(WebViewNotifyFunction notifyFunction) {
+/**
+ * Triggered when the document title is changed
+ */
+static void title_notify(GObject *gobject, GParamSpec *pspec, gpointer user_data) {
+    gchar *title;
+    g_object_get(gobject, "title", &title,  NULL);
+    
+    WebView *webview = (WebView*)user_data;
+    webview->common.titleChangeFunction(webview, title ? title : "");
+    
+    g_free(title);
+}
+
+
+WebView *webview_new(WebViewNotifyFunction notifyFunction,
+                     WebViewTitleChangeFunction titleChangeFunction) {
     WebView *webview = g_malloc(sizeof(WebView));
     webview->common.notifyFunction = notifyFunction;
+    webview->common.titleChangeFunction = titleChangeFunction;
     
     // Create an editable WebKit view
     GtkWidget *widget = webkit_web_view_new();
@@ -99,6 +115,7 @@ WebView *webview_new(WebViewNotifyFunction notifyFunction) {
     // Install handlers
     g_signal_connect(widget, "notify::load-status", G_CALLBACK(load_status_notify), webview);
     g_signal_connect(widget, "status-bar-text-changed", G_CALLBACK(status_changed), webview);
+    g_signal_connect(widget, "notify::title", G_CALLBACK(title_notify), webview);
     
     // TODO release settings object?
     
@@ -153,6 +170,14 @@ void webview_load(WebView *webview, const gchar *url, const gchar *content,
 
 gchar *webview_getHTML(WebView *webview) {
     return webview_executeExpression(webview, "getHTML()");
+}
+
+
+void webview_setTitle(WebView *webview, const gchar *title) {
+    gchar *escapedTitle = g_strescape(title, NULL);
+    webview_executeFormattedScript(webview, "document.title = \"%s\";",
+                                   escapedTitle);
+    g_free(escapedTitle);
 }
 
 
