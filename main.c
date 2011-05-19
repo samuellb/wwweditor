@@ -40,6 +40,7 @@ static GtkActionGroup *documentActions;
 
 // File tree
 static GtkTreeStore *fileTree;
+static GtkTreeModel *fileTreeModel;
 #define ICON_DIR       GTK_STOCK_DIRECTORY
 #define ICON_PAGE      GTK_STOCK_FILE
 #define ICON_TEMPLATE  GTK_STOCK_COPY
@@ -205,6 +206,35 @@ static gint fileSortFunc(GtkTreeModel *model, GtkTreeIter *a,
     return res;
 }
 
+
+static void updateDirViewEntry(GtkTreeIter *iter, const gchar *uri,
+                               gboolean isDir) {
+    const gchar *icon;
+    FileState fileState;
+    if (isDir) {
+        // Add subdirectories
+        icon = ICON_DIR;
+        fileState = FileState_Unmodified; // TODO should be modified if dir contents have been modified or if the directory is unknown to GIT
+    } else {
+        FileInfo *info = controller_getFileInfo(uri);
+        if (info->isTemplate) icon = ICON_TEMPLATE;
+        else if (info->templateURI) icon = ICON_PAGE;
+        else icon = ICON_OTHER;
+        fileState = info->state;
+        
+        controller_freeFileInfo(info);
+    }
+    
+    gtk_tree_store_set(fileTree, iter,
+                       FileColumn_Icon, icon,
+                       FileColumn_FileState, stateIcons[fileState],
+                       FileColumn_DisplayName, strrchr(uri, '/')+1,
+                       FileColumn_URI, uri,
+                       FileColumn_IsDirectory, isDir,
+                       -1);
+}
+
+
 static void addDirectory(GtkTreeIter *parent,
                          const gchar *path, const gchar *baseUri) {
     // TODO use change notification
@@ -225,32 +255,13 @@ static void addDirectory(GtkTreeIter *parent,
         
         gchar *filename = g_build_filename(path, entry, NULL);
         gchar *uri = g_build_path("/", baseUri, entry, NULL);
-        const gchar *icon;
-        FileState fileState;
         gboolean isDir = g_file_test(filename, G_FILE_TEST_IS_DIR);
+        
         if (isDir) {
-            // Add subdirectories
             addDirectory(&iter, filename, uri);
-            icon = ICON_DIR;
-            fileState = FileState_Unmodified; // TODO should be modified if dir contents have been modified or if the directory is unknown to GIT
-        } else {
-            FileInfo *info = controller_getFileInfo(uri);
-            if (info->isTemplate) icon = ICON_TEMPLATE;
-            else if (info->templateURI) icon = ICON_PAGE;
-            else icon = ICON_OTHER;
-            fileState = info->state;
-            
-            controller_freeFileInfo(info);
         }
         
-        gtk_tree_store_set(fileTree, &iter,
-                           FileColumn_Icon, icon,
-                           FileColumn_FileState, stateIcons[fileState],
-                           FileColumn_DisplayName, entry,
-                           FileColumn_URI, uri,
-                           FileColumn_IsDirectory, isDir,
-                           -1);
-        
+        updateDirViewEntry(&iter, uri, isDir);
         g_free(uri);
         g_free(filename);
     }
@@ -263,6 +274,45 @@ void view_showDirectory(const gchar *path) {
     if (!path) return;
     
     addDirectory(NULL, path, "/");
+}
+
+
+static gboolean findTreeViewRow(const gchar *uri, GtkTreeIter *iter) {
+    do {
+        // Check if this is the right item
+        gchar *value;
+        gtk_tree_model_get(fileTreeModel, iter, FileColumn_URI, &value, -1);
+        gint difference = strcmp(uri, value);
+        g_free(value);
+        if (!difference) return TRUE;
+        
+        GtkTreeIter children;
+        if (gtk_tree_model_iter_children(fileTreeModel, &children, iter)) {
+            // Recurse into directories
+            if (findTreeViewRow(uri, &children)) {
+                // Copy iter
+                *iter = children;
+                return TRUE;
+            }
+        }
+        
+    } while (gtk_tree_model_iter_next(fileTreeModel, iter));
+    
+    return FALSE;
+}
+
+
+void view_updateFileState(const gchar *path, const gchar *uri) {
+    // Find it in the tree view
+    GtkTreeIter iter;
+    gtk_tree_model_get_iter_first(fileTreeModel, &iter);
+    if (!findTreeViewRow(uri, &iter)) {
+        g_fprintf(stderr, "failed to find entry in tree view: %s\n", uri);
+        return;
+    }
+    
+    // Update tree view
+    updateDirViewEntry(&iter, uri, FALSE);
 }
 
 
@@ -411,6 +461,7 @@ int main(int argc, char **argv) {
     // Prepare file tree
     GtkTreeView *fileTreeView = GTK_TREE_VIEW(gtk_builder_get_object(builder, "file_tree_view"));
     fileTree = GTK_TREE_STORE(gtk_builder_get_object(builder, "file_tree"));
+    fileTreeModel = gtk_tree_view_get_model(fileTreeView);
     
     GtkTreeViewColumn *fileColumn = gtk_tree_view_column_new();
     

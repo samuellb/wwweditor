@@ -56,6 +56,16 @@ static void updateDirectoryView() {
 }
 
 
+static void updateFileState(const gchar *uri) {
+    // Refresh file state
+    project_refresh(activeProject);
+    
+    // Update tree view
+    const gchar *path = project_getPath(activeProject);
+    view_updateFileState(path, uri);
+}
+
+
 gboolean controller_setProjectPath(const gchar *path) {
     controller_saveDocument();
     
@@ -82,8 +92,7 @@ gboolean controller_setProjectPath(const gchar *path) {
 void controller_newDocument(const gchar *uri, const gchar *templateURI) {
     project_addPage(activeProject, uri, templateURI);
     
-    // TODO update only the added file!
-    updateDirectoryView();
+    updateFileState(uri);
     
     controller_loadDocument(uri);
 }
@@ -122,8 +131,7 @@ void controller_saveDocument() {
         project_savePage(activeProject, activeDocument, html);
         g_free(html);
         
-        // TODO update only the modified file!
-        updateDirectoryView();
+        updateFileState(activeDocument);
     }
 }
 

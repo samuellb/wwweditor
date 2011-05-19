@@ -49,6 +49,8 @@ void controller_freeFileInfo(FileInfo *status);
 
 // These functions must be provided by the view
 void view_showDirectory(const gchar *path);
+void view_updateFileState(const gchar *path, const gchar *uri);
+
 void view_showDocument(const gchar *fileURL,
                        const gchar *uri, const gchar *html,
                        gboolean wholePageEditable);
