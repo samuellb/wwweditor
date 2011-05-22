@@ -409,7 +409,7 @@ int main(int argc, char **argv) {
     GError *error = NULL;
     static gchar **paths = NULL;
     static const GOptionEntry entries[] = {
-        { G_OPTION_REMAINING, 0, G_OPTION_FLAG_FILENAME,
+        { G_OPTION_REMAINING, 0, 0,
           G_OPTION_ARG_FILENAME_ARRAY, &paths, NULL, "DIRECTORY" },
         { NULL, 0, 0, 0, NULL, NULL, NULL, }
     };
