@@ -1,7 +1,7 @@
 
 all: wwwproject
 
-CFLAGS += -Wall -Wextra -g --std=c99 `pkg-config --cflags 'gtk+-2.0 >= 2.16' webkit-1.0` -DGTK_DISABLE_DEPRECATED=1 -DGDK_DISABLE_DEPRECATED=1 -DG_DISABLE_DEPRECATED=1 -DGSEAL_ENABLE
+CFLAGS += -Wall -Wextra -Wno-unused-parameter -g --std=c99 `pkg-config --cflags 'gtk+-2.0 >= 2.16' webkit-1.0` -DGTK_DISABLE_DEPRECATED=1 -DGDK_DISABLE_DEPRECATED=1 -DG_DISABLE_DEPRECATED=1 -DGSEAL_ENABLE
 LDFLAGS += -Wl,--as-needed
 LIBS += `pkg-config --libs 'gtk+-2.0 >= 2.16' webkit-1.0`
 
