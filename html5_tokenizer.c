@@ -433,7 +433,7 @@ gboolean tokenizer_readToken(const gchar **html, Token *token) {
     token->dataLength = *html - token->data;
     
     gchar *tagName = g_ascii_strdown(token->data, token->dataLength);
-    for (TagType t = 0; t < TagCount; t++) {
+    for (TokenTag t = 0; t < TagCount; t++) {
         if (!strcmp(tagName, tokenizer_tagName[t])) {
             token->tag = t;
             break;
