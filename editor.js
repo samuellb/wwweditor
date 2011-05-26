@@ -128,6 +128,69 @@ function getHTML() {
 }
 
 
+var blockElems = ["blockquote", "div", "h1", "h2", "h3", "h4", "h5", "h6", "p"];
+var specialElems = ["body", "form", "iframe", "td"];
+var stopElems = blockElems.concat(specialElems);
+
+function findContainingBlock(node) {
+    if (node == null || !nodeIsEditable(node)) return null;
+    
+    // Find the containing block-level element
+    while (node.parentNode != null && (node.nodeType != Node.ELEMENT_NODE ||
+                                       !stopElems.contains(node.nodeName.toLowerCase()))) {
+        node = node.parentNode;
+    }
+    
+    return node;
+}
+
+// Returns the selected blocks level elements, or the block where the
+// cursor is if there's no selection.
+function getSelectedBlocks() {
+    var blocks = [];
+    var selection = window.getSelection();
+    for (var i = 0; i < selection.rangeCount; i++) {
+        var range = selection.getRangeAt(i);
+        
+        // Starting point in the tree
+        var node = range.startContainer;
+        // we ignore the start/endOffsets because we're not interested
+        // in specific text segments, but only the paragraph as a whole.
+        
+        for (;;) {
+            // Text nodes make up the selection
+            // TODO it can contain some other things like images and objects
+            if (node.nodeType == Node.TEXT_NODE) {
+                var block = findContainingBlock(node);
+                if (!blocks.contains(block)) {
+                    blocks.push(block);
+                }
+            }
+            
+            // Check for end of selection
+            if (node == range.endContainer) break;
+            
+            // Go to next node
+            if (node.firstChild != null) {
+                // Go deeper down in the tree
+                node = node.firstChild;
+            } else if (node.nextSibling != null) {
+                // Go to next node
+                node = node.nextSibling;
+            } else if (node.parentNode != null) {
+                // Go up to the node after the parent
+                node = node.parentNode.nextSibling;
+            } else {
+                // Error!
+                break;
+            }
+        }
+    }
+    
+    return blocks;
+}
+
+
 // Cursor move detection
 var lastNode = null;
 var i = 0;
@@ -175,46 +238,40 @@ document.documentElement.addEventListener("selectstart", cursorMoved, true);
 
 // Sets the tag name of the current block-level element
 function setElementType(elementName) {
-    var blockElems = ["blockquote", "div", "h1", "h2", "h3", "h4", "h5", "h6", "p"];
-    var specialElems = ["body", "form", "iframe", "td"];
-    var stopElems = blockElems.concat(specialElems);
     
-    var curNode = window.getSelection().anchorNode;
-    if (curNode == null || !nodeIsEditable(curNode)) return;
+    var blocks = getSelectedBlocks();
     
-    // Find the containing block-level element
-    while (curNode.parentNode != null && (curNode.nodeType != Node.ELEMENT_NODE ||
-                                          !stopElems.contains(curNode.nodeName.toLowerCase()))) {
-        curNode = curNode.parentNode;
-    }
-    
-    // Don't replace elements with special meaning or the root element
-    var wrap = !curNode.parentNode ||
-               specialElems.contains(curNode.nodeName.toLowerCase()) ||
-               editableElements.contains(curNode);
-    
-    // Create an element of the new type
-    var newElem = document.createElement(elementName);
-    
-    if (!wrap) {
-        // Copy attributes
-        var oldAttrs = curNode.attributes;
-        for (var i = 0; i < oldAttrs.length; i++) {
-            newElem.setAttribute(oldAttrs[i].nodeName, oldAttrs[i].nodeValue);
+    for (var i = 0; i < blocks.length; i++) {
+        var block = blocks[i];
+        
+        // Don't replace elements with special meaning or the root element
+        var wrap = !block.parentNode ||
+                   specialElems.contains(block.nodeName.toLowerCase()) ||
+                   editableElements.contains(block);
+        
+        // Create an element of the new type
+        var newElem = document.createElement(elementName);
+        
+        if (!wrap) {
+            // Copy attributes
+            var oldAttrs = block.attributes;
+            for (var i = 0; i < oldAttrs.length; i++) {
+                newElem.setAttribute(oldAttrs[i].nodeName, oldAttrs[i].nodeValue);
+            }
         }
-    }
-    
-    // Move child nodes
-    while (curNode.firstChild != null) {
-        newElem.appendChild(curNode.firstChild);
-    }
-    
-    if (!wrap) {
-        // Delete the old element
-        curNode.parentNode.replaceChild(newElem, curNode);
-    } else {
-        // Add the new node to this node
-        curNode.appendChild(newElem);
+        
+        // Move child nodes
+        while (block.firstChild != null) {
+            newElem.appendChild(block.firstChild);
+        }
+        
+        if (!wrap) {
+            // Delete the old element
+            block.parentNode.replaceChild(newElem, block);
+        } else {
+            // Add the new node to this node
+            block.appendChild(newElem);
+        }
     }
 }
 
