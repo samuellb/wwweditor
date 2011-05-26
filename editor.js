@@ -190,6 +190,27 @@ function getSelectedBlocks() {
     return blocks;
 }
 
+function selectElements(elems) {
+    // Clear selection
+    var selection = document.getSelection();
+    selection.removeAllRanges();
+    
+    // Place cursor in element if only one element is to be selected
+    if (elems.length == 1) {
+        var range = document.createRange();
+        range.setStart(elems[0], 0);
+        selection.addRange(range);
+        return;
+    }
+    
+    // More than one element is to be selected
+    for (var i = 0; i < elems.length; i++) {
+        var range = document.createRange();
+        range.selectNode(elems[i]);
+        selection.addRange(range);
+    }
+}
+
 
 // Cursor move detection
 var lastNode = null;
@@ -240,6 +261,7 @@ document.documentElement.addEventListener("selectstart", cursorMoved, true);
 function setElementType(elementName) {
     
     var blocks = getSelectedBlocks();
+    var newBlocks = [];
     
     for (var i = 0; i < blocks.length; i++) {
         var block = blocks[i];
@@ -272,7 +294,13 @@ function setElementType(elementName) {
             // Add the new node to this node
             block.appendChild(newElem);
         }
+        
+        // The new block should be selected
+        newBlocks.push(newElem);
     }
+    
+    // Select the new blocks
+    selectElements(newBlocks);
 }
 
 
