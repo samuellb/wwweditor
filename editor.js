@@ -235,9 +235,12 @@ function cursorMoved(e) {
         return;
     }
     
+    // Find out element type of the block
+    var block = findContainingBlock(curNode);
+    
     // Build info message
     var msg =
-        curNode.tagName.toLowerCase()+"\n"+
+        block.tagName.toLowerCase()+"\n"+
         emptyIfNull(curNode.getAttribute("class"))+"\n"+
         emptyIfNull(curNode.getAttribute("href"))+"\n"+
         emptyIfNull(curNode.getAttribute("title"));
