@@ -38,7 +38,7 @@ Editor (C):
   [ ] Clean up the code (indentation, remove Apple-style-span, <h3><span style="font-...: normal">, etc.)
   [X] Clean up some aspects of the code live
   [ ] Javascript plugins/extensions?
-  [ ] Restore the selection after the element type is changed
+  [X] Restore the selection after the element type is changed
 
 Editor (JS):
   [ ] Make non-editable elements non-focusable (like <a>, <input>, <button>, etc.)
