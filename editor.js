@@ -144,6 +144,22 @@ function findContainingBlock(node) {
     return node;
 }
 
+function nextInTree(node) {
+    if (node.firstChild != null) {
+        // Go deeper down in the tree
+        return node.firstChild;
+    } else if (node.nextSibling != null) {
+        // Go to next node
+        return node.nextSibling;
+    } else if (node.parentNode != null) {
+        // Go up to the node after the parent
+        return node.parentNode.nextSibling;
+    } else {
+        // Error!
+        return null;
+    }
+}
+
 // Returns the selected blocks level elements, or the block where the
 // cursor is if there's no selection.
 function getSelectedBlocks() {
@@ -170,20 +186,7 @@ function getSelectedBlocks() {
             // Check for end of selection
             if (node == range.endContainer) break;
             
-            // Go to next node
-            if (node.firstChild != null) {
-                // Go deeper down in the tree
-                node = node.firstChild;
-            } else if (node.nextSibling != null) {
-                // Go to next node
-                node = node.nextSibling;
-            } else if (node.parentNode != null) {
-                // Go up to the node after the parent
-                node = node.parentNode.nextSibling;
-            } else {
-                // Error!
-                break;
-            }
+            node = nextInTree(node);
         }
     }
     
