@@ -388,7 +388,25 @@ document.documentElement.addEventListener("keypress", handleBackspace, true);
 document.documentElement.addEventListener("keyup", handleBackspace, true);
 
 if (editableElements.length > 0) {
-    editableElements[0].focus();
+    // Focus the editor
+    var ed = editableElements[0];
+    ed.focus();
+    
+    // Instead of selecting everything (default behavior),
+    // put the cursor at the beginning
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    var range = document.createRange();
+    range.setStart(ed, 0);
+    range.setEnd(ed, 0);
+    selection.addRange(range);
+    
+    delete range;
+    delete selection;
+    delete ed;
+    
+    // Update the GUI
+    cursorMoved(null);
 }
 
 
