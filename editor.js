@@ -185,9 +185,8 @@ function getSelectedBlocks() {
         // in specific text segments, but only the paragraph as a whole.
         
         for (;;) {
-            // Text nodes make up the selection
-            // TODO it can contain some other things like images and objects
-            if (node.nodeType == Node.TEXT_NODE && !node.nodeValue.match(/^\s*$/)) {
+            // Ignore space and comments
+            if (!isEmptyTextNode(node) && node.nodeType != Node.NODE_COMMENT) {
                 var block = findContainingBlock(node);
                 if (!blocks.contains(block)) {
                     blocks.push(block);
