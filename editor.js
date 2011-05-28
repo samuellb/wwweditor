@@ -136,8 +136,9 @@ function findContainingBlock(node) {
     if (node == null || !nodeIsEditable(node)) return null;
     
     // Find the containing block-level element
-    while (node.parentNode != null && (node.nodeType != Node.ELEMENT_NODE ||
-                                       !stopElems.contains(node.nodeName.toLowerCase()))) {
+    while (node.parentNode != null && !editableElements.contains(node) &&
+           (node.nodeType != Node.ELEMENT_NODE ||
+            !stopElems.contains(node.nodeName.toLowerCase()))) {
         node = node.parentNode;
     }
     
@@ -193,6 +194,17 @@ function getSelectedBlocks() {
     return blocks;
 }
 
+
+function getNextNonSpace(node) {
+    do {
+        node = node.nextSibling;
+    } while (node != null &&
+             node.nodeType == Node.TEXT_NODE &&
+             node.nodeValue.match(/^\s*$/));
+    
+    return node;
+}
+
 function selectElements(elems) {
     // Clear selection
     var selection = document.getSelection();
@@ -209,7 +221,24 @@ function selectElements(elems) {
     // More than one element is to be selected
     for (var i = 0; i < elems.length; i++) {
         var range = document.createRange();
-        range.selectNode(elems[i]);
+        
+        // Look ahead if this is a contiguous selection
+        var j = i+1;
+        for (; j < elems.length; j++) {
+            var next = getNextNonSpace(elems[j-1]);
+            if (getNextNonSpace(elems[j-1]) != elems[j]) break;
+        }
+        j--;
+        
+        if (j != i) {
+            // Contiguous selection
+            range.setStart(elems[i], 0);
+            range.setEndAfter(elems[j]);
+            i = j;
+        } else {
+            // Single block
+            range.selectNode(elems[i]);
+        }
         selection.addRange(range);
     }
 }
@@ -283,8 +312,8 @@ function setElementType(elementName) {
         if (!wrap) {
             // Copy attributes
             var oldAttrs = block.attributes;
-            for (var i = 0; i < oldAttrs.length; i++) {
-                newElem.setAttribute(oldAttrs[i].nodeName, oldAttrs[i].nodeValue);
+            for (var j = 0; j < oldAttrs.length; j++) {
+                newElem.setAttribute(oldAttrs[j].nodeName, oldAttrs[j].nodeValue);
             }
         }
         
@@ -299,6 +328,7 @@ function setElementType(elementName) {
         } else {
             // Add the new node to this node
             block.appendChild(newElem);
+            newElem = block;
         }
         
         // The new block should be selected
