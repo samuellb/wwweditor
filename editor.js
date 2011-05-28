@@ -160,7 +160,7 @@ function getSelectedBlocks() {
         for (;;) {
             // Text nodes make up the selection
             // TODO it can contain some other things like images and objects
-            if (node.nodeType == Node.TEXT_NODE) {
+            if (node.nodeType == Node.TEXT_NODE && !node.nodeValue.match(/^\s*$/)) {
                 var block = findContainingBlock(node);
                 if (!blocks.contains(block)) {
                     blocks.push(block);
