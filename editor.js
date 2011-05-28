@@ -47,11 +47,21 @@ function isMarkerComment(node) {
             node.nodeValue.search(/^\s*@\s*/) == 0);
 }
 
+function isEmptyTextNode(node) {
+    return node.nodeType == Node.TEXT_NODE &&
+           node.nodeValue.match(/^\s*$/);
+}
+
+function isTextNode(node) {
+    return node.nodeType == Node.TEXT_NODE &&
+           !node.nodeValue.match(/^\s*$/);
+}
+
 function makeMarkedEditable(obj) {
     var inBeginning = true;
     for (var node = obj.firstChild; node != null; node = node.nextSibling) {
         // Skip empty text nodes
-        if (node.nodeType == Node.TEXT_NODE && node.nodeValue.search(/^\s*$/) == 0)
+        if (isEmptyTextNode(node))
             continue;
         
         // Look for special comments in the beginning
@@ -74,7 +84,7 @@ function checkMarkers() {
         var hasMarker = false;
         for (var node = obj.firstChild; node != null; node = node.nextSibling) {
             // Skip empty text nodes
-            if (node.nodeType == Node.TEXT_NODE && node.nodeValue.search(/^\s*$/) == 0)
+            if (isEmptyTextNode(node))
                 continue;
             
             // Look for special comments in the beginning
