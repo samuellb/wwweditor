@@ -197,7 +197,7 @@ gchar *webview_executeExpression(WebView *webview, const gchar *expr) {
     
     // Use the title to store the value of the expression
     webview_executeFormattedScript(webview, "var oldTitle = document.title;"
-                                            "document.title = escape(%s);", expr);
+                                            "document.title = encodeURIComponent(%s);", expr);
     
     gchar *result = g_uri_unescape_string(webkit_web_view_get_title(widget), NULL);
     
