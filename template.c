@@ -227,6 +227,12 @@ gchar *template_updatePage(const Template *tem, const gchar *pageHTML) {
         if (pageMarker) {
             append(&output, &outputLength,
                    pageMarker->content, pageMarker->contentLength);
+        } else {
+            // Marker not found, create a new marker with no contents
+            gchar *comment = g_strdup_printf("\n<!-- @%.*s -->\n",
+                                             marker->nameLength, marker->name);
+            append(&output, &outputLength, comment, strlen(comment));
+            g_free(comment);
         }
     }
     
