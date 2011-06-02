@@ -24,6 +24,7 @@
 
 #include <string.h>
 #include <glib/gprintf.h>
+#include <glib/gstdio.h>
 #include "template.h"
 
 #include "project.h"
@@ -242,4 +243,10 @@ gboolean project_addPage(Project *project, const gchar *uri, const gchar *templa
     return project_savePage(project, uri, "");
 }
 
+gboolean project_deletePage(Project *project, const gchar *uri) {
+    gchar *filename = g_strconcat(project->path, uri, NULL);
+    gboolean ok = (g_remove(filename) == 0);
+    g_free(filename);
+    return ok;
+}
 

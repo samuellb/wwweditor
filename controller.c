@@ -22,6 +22,7 @@
 
 */
 
+#include <string.h>
 #include "project.h"
 
 #include "controller.h"
@@ -128,10 +129,28 @@ void controller_loadDocument(const gchar *uri) {
 void controller_saveDocument() {
     if (activeProject && activeDocument) {
         gchar *html = view_getDocumentHTML();
-        project_savePage(activeProject, activeDocument, html);
+        gchar *filename = view_getDocumentFilename();
+        
+        // Save contents
+        project_savePage(activeProject, filename, html);
         g_free(html);
         
-        updateFileState(activeDocument);
+        // Check if the filename was changed
+        if (strcmp(filename, activeDocument) != 0) {
+            // Delete old file
+            project_deletePage(activeProject, activeDocument);
+            g_free(activeDocument);
+            activeDocument = filename;
+            
+            // Update file tree
+            updateDirectoryView();
+        } else {
+            // The filename is already stored in activeDocument
+            g_free(filename);
+            
+            // Update file tree
+            updateFileState(activeDocument);
+        }
     }
 }
 

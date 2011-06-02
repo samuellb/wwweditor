@@ -44,6 +44,7 @@ gchar *project_getFileURL(const Project *project, const gchar *uri);
 gchar *project_loadPage(const Project *project, const gchar *uri);
 gboolean project_savePage(Project *project, const gchar *uri, const gchar *html);
 gboolean project_addPage(Project *project, const gchar *uri, const gchar *templateURI);
+gboolean project_deletePage(Project *project, const gchar *uri);
 
 #endif
 

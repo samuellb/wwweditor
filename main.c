@@ -341,6 +341,9 @@ gchar *view_getDocumentHTML() {
     return webview_getHTML(webview);
 }
 
+gchar *view_getDocumentFilename() {
+    return g_strconcat("/", gtk_entry_get_text(filenameEntry), NULL);
+}
 
 void view_quit() {
     gtk_main_quit();

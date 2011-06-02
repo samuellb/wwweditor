@@ -55,6 +55,7 @@ void view_showDocument(const gchar *fileURL,
                        const gchar *uri, const gchar *html,
                        gboolean wholePageEditable);
 gchar *view_getDocumentHTML();
+gchar *view_getDocumentFilename();
 
 void view_quit();
 
