@@ -190,9 +190,7 @@ FileState project_getFileState(Project *project, const gchar *uri) {
 
 
 gchar *project_getFileURL(const Project *project, const gchar *uri) {
-    return g_strconcat("file://",
-        (g_path_is_absolute(uri) ? "" : "./"),
-        uri, NULL);
+    return g_strconcat("file://", project->path, uri, NULL);
 }
 
 
