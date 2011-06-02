@@ -196,16 +196,22 @@ gchar *project_getFileURL(const Project *project, const gchar *uri) {
 }
 
 
+static gchar *getTemplateContentsForPage(const Project *project, const gchar *pageURI) {
+    gchar *templateURI = project_getTemplateURI(project, pageURI);
+    if (!templateURI) return NULL;
+    
+    gchar *templateContents = project_loadPage(project, templateURI);
+    g_free(templateURI);
+    return templateContents;
+}
+
+
 static gchar *mergeWithTemplate(const Project *project, const gchar *uri,
                                 const gchar *contents) {
     if (!contents) return NULL;
     
     // Load template
-    gchar *templateURI = project_getTemplateURI(project, uri);
-    if (!templateURI) return g_strdup(contents);
-    
-    gchar *templateContents = project_loadPage(project, templateURI);
-    g_free(templateURI);
+    gchar *templateContents = getTemplateContentsForPage(project, uri);
     if (!templateContents) return g_strdup(contents);
     
     // Merge
@@ -239,8 +245,17 @@ gboolean project_savePage(Project *project, const gchar *uri, const gchar *html)
 
 
 gboolean project_addPage(Project *project, const gchar *uri, const gchar *templateURI) {
+    gboolean ok = FALSE;
+    
     // TODO: set template URI
-    return project_savePage(project, uri, "");
+    
+    // Start with the template contents as the page contents
+    gchar *templateContents = getTemplateContentsForPage(project, uri);
+    
+    ok = project_savePage(project, uri, templateContents ? templateContents : "");
+    
+    g_free(templateContents);
+    return ok;
 }
 
 gboolean project_deletePage(Project *project, const gchar *uri) {
