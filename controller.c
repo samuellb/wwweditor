@@ -93,7 +93,7 @@ gboolean controller_setProjectPath(const gchar *path) {
 void controller_newDocument(const gchar *uri, const gchar *templateURI) {
     project_addPage(activeProject, uri, templateURI);
     
-    updateFileState(uri);
+    updateDirectoryView();
     
     controller_loadDocument(uri);
 }
