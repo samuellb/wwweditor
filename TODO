@@ -49,6 +49,8 @@ Editor (C):
 
 Editor (JS):
   [ ] Make non-editable elements non-focusable (like <a>, <input>, <button>, etc.)
+  [ ] Prevent normalization of:
+      [ ] Entities, such as &shy;
 
 User interface:
   [ ] Restore window size and position. Should be saved per computer/hostname
