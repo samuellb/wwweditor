@@ -1,4 +1,11 @@
 
+Backend-related:
+  [ ] Create an interface for template systems
+  [ ] Create an interface for versioning systems (not sure if this is
+      acutally a good thing, I don't see any benefits of the alternatives
+      to GIT (like SVN, Bazaar, etc))
+  [ ] Move template/project stuff to a separate binary?
+
 Parser(?):
   [ ] Ensure the output (input?) is always UTF-8:
         g_utf8_validate(s, NULL, NULL)
