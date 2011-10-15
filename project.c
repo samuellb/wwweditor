@@ -59,6 +59,33 @@ void project_free(Project *project) {
 }
 
 
+static gboolean run_git_command(Project *project, gchar **argv) {
+    gint exitStatus;
+    GError *error = NULL;
+    
+    if (!g_spawn_sync(project->path, argv, NULL,
+                      G_SPAWN_SEARCH_PATH,
+                      NULL, NULL,
+                      NULL, NULL, // pipes
+                      &exitStatus,
+                      &error)) {
+        // TODO better error message
+        g_fprintf(stderr, "failed to spawn process!\n");
+        g_error_free(error);
+        return FALSE;
+    }
+    
+    if (exitStatus) {
+        // TODO print argv properly
+        g_fprintf(stderr, "command %s %s failed. exit code: %d\n",
+                  argv[0], argv[1], exitStatus);
+        return FALSE;
+    }
+    
+    return TRUE;
+
+}
+
 static FileState gitStateToFileState(gchar x, gchar y) {
     switch (y) {
         case '?': return FileState_Unknown;
@@ -264,6 +291,21 @@ gboolean project_addPage(Project *project, const gchar *uri, const gchar *templa
     ok = project_savePage(project, uri, templateContents ? templateContents : "");
     
     g_free(templateContents);
+    
+    // Add to GIT
+    project_addFile(project, uri);
+    
+    return ok;
+}
+
+gboolean project_addFile(Project *project, const gchar *uri) {
+    // Run "git add -Nf -- filename"
+    static gchar *argv[] = { "git", "add", "-Nf", "--", NULL, NULL };
+    
+    if (uri[0] == '/') uri++;
+    argv[4] = uri;
+    gboolean ok = run_git_command(project, argv);
+    
     return ok;
 }
 
@@ -278,37 +320,10 @@ gboolean project_hasUncommitted(const Project *project) {
     return project->hasUncommitted;
 }
 
-static gboolean run_git_command(Project *project, gchar **argv) {
-    gint exitStatus;
-    GError *error = NULL;
-    
-    if (!g_spawn_sync(project->path, argv, NULL,
-                      G_SPAWN_SEARCH_PATH,
-                      NULL, NULL,
-                      NULL, NULL, // pipes
-                      &exitStatus,
-                      &error)) {
-        // TODO better error message
-        g_fprintf(stderr, "failed to spawn process!\n");
-        g_error_free(error);
-        return FALSE;
-    }
-    
-    if (exitStatus) {
-        // TODO print argv properly
-        g_fprintf(stderr, "command %s %s failed. exit code: %d\n",
-                  argv[0], argv[1], exitStatus);
-        return FALSE;
-    }
-    
-    return TRUE;
-
-}
-
 gboolean project_commit(Project *project, const gchar *message) {
-    // Run "git commit ."
+    // Run "git commit -m xxx -a"
     gchar *msg = g_strdup(message);
-    static gchar *argv[] = { "git", "commit", "-m", NULL, ".", NULL };
+    static gchar *argv[] = { "git", "commit", "-m", NULL, "-a", NULL };
     
     argv[3] = msg;
     gboolean ok = run_git_command(project, argv);
@@ -318,8 +333,13 @@ gboolean project_commit(Project *project, const gchar *message) {
 }
 
 gboolean project_discard(Project *project) {
-    // Run "git checkout ."
-    static gchar *argv[] = { "git", "checkout", ".", NULL };
-    return run_git_command(project, argv);
+    // Run "git reset HEAD" and "git checkout ."
+    static gchar *reset[] = { "git", "reset", "HEAD", NULL };
+    gboolean okr = run_git_command(project, reset);
+    
+    static gchar *checkout[] = { "git", "checkout", ".", NULL };
+    gboolean okc = run_git_command(project, checkout);
+    
+    return okr && okc;
 }
 

@@ -154,6 +154,10 @@ void controller_saveDocument() {
             g_free(activeDocument);
             activeDocument = filename;
             
+            // Notify GIT of this change
+            // TODO we shouldn't do this if the file wasn't known to GIT from the beginning
+            project_addFile(activeProject, activeDocument);
+            
             // Update file tree
             updateDirectoryView();
         } else {

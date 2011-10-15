@@ -67,7 +67,7 @@ static const char *stateIcons[] = {
     GTK_STOCK_COPY,     // Copied
     GTK_STOCK_ADD,      // Added
     GTK_STOCK_REMOVE,   // Removed
-    GTK_STOCK_ADD,      // Unknown to GIT
+    GTK_STOCK_DIALOG_QUESTION, // Unknown to GIT
 };
 
 // Web view
