@@ -30,6 +30,9 @@
 #include "controller.h"
 #include "webview.h"
 
+// TODO use gettext
+#define _(x) (x)
+
 
 static GtkBuilder *builder;
 static GtkWidget *main_window;
@@ -37,6 +40,7 @@ static GtkWidget *main_window;
 // Actions
 static GtkActionGroup *projectActions;
 static GtkActionGroup *documentActions;
+static GtkActionGroup *changesetActions;
 
 // File tree
 static GtkTreeStore *fileTree;
@@ -316,6 +320,11 @@ void view_updateFileState(const gchar *path, const gchar *uri) {
 }
 
 
+void view_setUncommited(gboolean uncommitted) {
+    gtk_action_group_set_sensitive(changesetActions, uncommitted);
+}
+
+
 void view_showDocument(const gchar *fileURL,
                        const gchar *uri, const gchar *html,
                        gboolean wholePageEditable) {
@@ -347,6 +356,58 @@ gchar *view_getDocumentFilename() {
 
 void view_quit() {
     gtk_main_quit();
+}
+
+static gchar *get_text_buffer_text(GtkTextBuffer *buffer) {
+    GtkTextIter start, end;
+    gtk_text_buffer_get_start_iter(buffer, &start);
+    gtk_text_buffer_get_end_iter(buffer, &end);
+    
+    gchar *text = gtk_text_buffer_get_text(buffer, &start, &end, TRUE);
+    
+    gtk_text_iter_free(&start);
+    gtk_text_iter_free(&end);
+    return text;
+}
+
+gboolean view_askCommit(gchar **message) {
+    // Prepare the commit dialog
+    GtkDialog *commit_dialog = GTK_DIALOG(gtk_builder_get_object(builder, "commit_dialog"));
+    
+    GtkEntry *entry = GTK_ENTRY(gtk_builder_get_object(builder, "commit_oneline_entry"));
+    GtkTextBuffer *buffer = GTK_TEXT_BUFFER(gtk_builder_get_object(builder, "commit_long_textbuffer"));
+    
+    gtk_entry_set_text(entry, "");
+    gtk_text_buffer_set_text(buffer, "", 0);
+    
+    // Wait for response from user
+    gint response = gtk_dialog_run(commit_dialog);
+    gtk_widget_hide(GTK_WIDGET(commit_dialog));
+    if (response != GTK_RESPONSE_OK) return FALSE;
+    
+    // Get information
+    const gchar *oneline = gtk_entry_get_text(entry);
+    gchar *longdesc = get_text_buffer_text(buffer);
+    g_strstrip(longdesc);
+    
+    if (*longdesc == '\0') {
+        // No long description
+        *message = g_strdup(oneline);
+    } else {
+        *message = g_strconcat(oneline, "\n\n", longdesc, "\n", NULL);
+    }
+    
+    return TRUE;
+}
+
+gboolean view_askDiscard() {
+    GtkWidget *dialog = gtk_message_dialog_new(
+        GTK_WINDOW(main_window), GTK_DIALOG_DESTROY_WITH_PARENT,
+        GTK_MESSAGE_WARNING, GTK_BUTTONS_YES_NO, "%s",
+            _("Are you sure you want to revert all uncommitted changes?"));
+    gint result = gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+    return (result == GTK_RESPONSE_YES);
 }
 
 
@@ -398,6 +459,16 @@ static void actionSavePage(GtkAction *action, gpointer user_data) {
 
 static void actionQuit(GtkAction *action, gpointer user_data) {
     controller_quit();
+}
+
+
+static void actionCommitChanges(GtkAction *action, gpointer user_data) {
+    controller_commitChanges();
+}
+
+
+static void actionDiscardChanges(GtkAction *action, gpointer user_data) {
+    controller_discardChanges();
 }
 
 
@@ -453,6 +524,7 @@ int main(int argc, char **argv) {
     // Prepare actions
     projectActions = GTK_ACTION_GROUP(gtk_builder_get_object(builder, "project_actions"));
     documentActions = GTK_ACTION_GROUP(gtk_builder_get_object(builder, "document_actions"));
+    changesetActions = GTK_ACTION_GROUP(gtk_builder_get_object(builder, "changeset_actions"));
     
     // TODO set up handlers here
     // merge open and save?
@@ -460,6 +532,9 @@ int main(int argc, char **argv) {
     setAction("NewPage", actionNewPage);
     setAction("SavePage", actionSavePage);
     setAction("Quit", actionQuit);
+    
+    setAction("CommitChanges", actionCommitChanges);
+    setAction("DiscardChanges", actionDiscardChanges);
     
     // Prepare file tree
     GtkTreeView *fileTreeView = GTK_TREE_VIEW(gtk_builder_get_object(builder, "file_tree_view"));

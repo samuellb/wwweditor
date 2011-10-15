@@ -42,6 +42,16 @@ static void freeDocument() {
 }
 
 
+static void updateProjectState() {
+    if (!activeProject) {
+        view_setUncommited(FALSE);
+    } else {
+        // Notify if there are uncommitted changes
+        view_setUncommited( project_hasUncommitted(activeProject));
+    }
+}
+
+
 static void updateDirectoryView() {
     if (!activeProject) {
         view_showDirectory(NULL);
@@ -85,6 +95,7 @@ gboolean controller_setProjectPath(const gchar *path) {
     
     // Update view
     updateDirectoryView();
+    updateProjectState();
     view_showDocument(NULL, NULL, NULL, FALSE);
     return (path == NULL || activeProject != NULL);
 }
@@ -94,6 +105,7 @@ void controller_newDocument(const gchar *uri, const gchar *templateURI) {
     project_addPage(activeProject, uri, templateURI);
     
     updateDirectoryView();
+    updateProjectState();
     
     controller_loadDocument(uri);
 }
@@ -151,6 +163,8 @@ void controller_saveDocument() {
             // Update file tree
             updateFileState(activeDocument);
         }
+        
+        updateProjectState();
     }
 }
 
@@ -186,5 +200,44 @@ void controller_freeFileInfo(FileInfo *status) {
     g_free(status->templateURI);
     g_free(status);
 }
+
+/**
+ * Commits all saves changes to the GIT repository.
+ */
+void controller_commitChanges() {
+    // TODO it should be possible to push when committing
+    gchar *message;
+    if (view_askCommit(&message)) {
+        // Save current document
+        controller_saveDocument();
+        
+        // Commit
+        project_commit(activeProject, message);
+        g_free(message);
+        
+        // Update user interface
+        updateDirectoryView();
+        updateProjectState();
+    }
+}
+
+/**
+ * Discards any changes that haven't been committed to the GIT repository.
+ */
+void controller_discardChanges() {
+    if (view_askDiscard()) {
+        // Close current document (discards changes in the editor)
+        freeDocument();
+        view_showDocument(NULL, NULL, NULL, FALSE);
+        
+        // Discard saved but uncommitted changes
+        project_discard(activeProject);
+        
+        // Update user interface
+        updateDirectoryView();
+        updateProjectState();
+    }
+}
+
 
 

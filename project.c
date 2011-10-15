@@ -35,6 +35,9 @@ struct Project_ {
     
     // File states in GIT
     GData *fileStates;
+    
+    // GIT state
+    gboolean hasUncommitted; // whether there are unstaged or uncommitted changes
 };
 
 
@@ -43,6 +46,7 @@ Project *project_init(const gchar *path) {
     project->path = (g_str_has_suffix(path, "/") ?
         g_strdup(path) : g_strconcat(path, "/", NULL));
     project->fileStates = NULL;
+    project->hasUncommitted = FALSE;
     
     project_refresh(project);
     return project;
@@ -71,6 +75,7 @@ void project_refresh(Project *project) {
     // Clear the file state list
     g_datalist_clear(&project->fileStates);
     g_datalist_init(&project->fileStates);
+    project->hasUncommitted = FALSE;
     
     // Read state from GIT
     
@@ -121,6 +126,12 @@ void project_refresh(Project *project) {
         gchar y = p[1];
         FileState state = gitStateToFileState(x, y);
         if (p[2] != ' ') continue;
+        
+        // Check if this file has uncommitted changes
+        if (state != FileState_Unknown && state != FileState_Unmodified) {
+            fprintf(stderr, "uncommitted file!\n");
+            project->hasUncommitted = TRUE;
+        }
         
         // Parse filename
         if (p[entrylen-1] == '/') p[entrylen-1] = '\0'; // remove trailing /
@@ -261,5 +272,54 @@ gboolean project_deletePage(Project *project, const gchar *uri) {
     gboolean ok = (g_remove(filename) == 0);
     g_free(filename);
     return ok;
+}
+
+gboolean project_hasUncommitted(const Project *project) {
+    return project->hasUncommitted;
+}
+
+static gboolean run_git_command(Project *project, gchar **argv) {
+    gint exitStatus;
+    GError *error = NULL;
+    
+    if (!g_spawn_sync(project->path, argv, NULL,
+                      G_SPAWN_SEARCH_PATH,
+                      NULL, NULL,
+                      NULL, NULL, // pipes
+                      &exitStatus,
+                      &error)) {
+        // TODO better error message
+        g_fprintf(stderr, "failed to spawn process!\n");
+        g_error_free(error);
+        return FALSE;
+    }
+    
+    if (exitStatus) {
+        // TODO print argv properly
+        g_fprintf(stderr, "command %s %s failed. exit code: %d\n",
+                  argv[0], argv[1], exitStatus);
+        return FALSE;
+    }
+    
+    return TRUE;
+
+}
+
+gboolean project_commit(Project *project, const gchar *message) {
+    // Run "git commit ."
+    gchar *msg = g_strdup(message);
+    static gchar *argv[] = { "git", "commit", "-m", NULL, ".", NULL };
+    
+    argv[3] = msg;
+    gboolean ok = run_git_command(project, argv);
+    
+    g_free(msg);
+    return ok;
+}
+
+gboolean project_discard(Project *project) {
+    // Run "git checkout ."
+    static gchar *argv[] = { "git", "checkout", ".", NULL };
+    return run_git_command(project, argv);
 }
 

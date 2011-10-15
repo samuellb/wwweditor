@@ -46,5 +46,9 @@ gboolean project_savePage(Project *project, const gchar *uri, const gchar *html)
 gboolean project_addPage(Project *project, const gchar *uri, const gchar *templateURI);
 gboolean project_deletePage(Project *project, const gchar *uri);
 
+gboolean project_hasUncommitted(const Project *project);
+gboolean project_commit(Project *project, const gchar *message);
+gboolean project_discard(Project *project);
+
 #endif
 

@@ -76,6 +76,30 @@
         </child>
       </object>
     </child>
+    <child>
+      <object class="GtkActionGroup" id="changeset_actions">
+        <property name="sensitive">False</property>
+        <child>
+          <object class="GtkAction" id="Changes">
+            <property name="label" translatable="yes">_Changes</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="CommitChanges">
+            <property name="label" translatable="yes">_Commit changes</property>
+            <property name="short_label" translatable="yes">Commit</property>
+            <property name="stock_id">gtk-apply</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkAction" id="DiscardChanges">
+            <property name="label" translatable="yes">_Discard changes</property>
+            <property name="short_label" translatable="yes">Discard</property>
+            <property name="stock_id">gtk-delete</property>
+          </object>
+        </child>
+      </object>
+    </child>
     <ui>
       <menubar name="menubar1">
         <menu action="Project">
@@ -95,6 +119,10 @@
         </menu>
         <menu action="View">
         </menu>
+        <menu action="Changes">
+            <menuitem action="CommitChanges" />
+            <menuitem action="DiscardChanges" />
+        </menu>
         <menu action="Help">
           <menuitem action="About" />
         </menu>
@@ -104,9 +132,148 @@
         <separator />
         <toolitem action="NewPage" />
         <toolitem action="SavePage" />
+        <separator />
+        <toolitem action="CommitChanges" />
+        <toolitem action="DiscardChanges" />
       </toolbar>
     </ui>
   </object>
+    <object class="GtkDialog" id="commit_dialog">
+    <property name="can_focus">False</property>
+    <property name="border_width">5</property>
+    <property name="type_hint">dialog</property>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="dialog-vbox1">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="dialog-action_area1">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="commit_cancel">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="commit_ok">
+                <property name="label">gtk-ok</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="has_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="box1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel" id="commit_oneline_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">_Description:</property>
+                <property name="use_underline">True</property>
+                <property name="mnemonic_widget">commit_oneline_entry</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="commit_oneline_entry">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="max_length">76</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="commit_long_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">
+Long description (optional):</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow" id="scrolledwindow3">
+                <property name="width_request">300</property>
+                <property name="height_request">150</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkTextView" id="commit_long_textview">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="buffer">commit_long_textbuffer</property>
+                    <property name="accepts_tab">False</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-6">commit_cancel</action-widget>
+      <action-widget response="-5">commit_ok</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkTextBuffer" id="commit_long_textbuffer"/>
   <object class="GtkWindow" id="main_window">
     <property name="default_width">750</property>
     <property name="default_height">500</property>

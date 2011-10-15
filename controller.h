@@ -46,16 +46,22 @@ void controller_quit();
 FileInfo *controller_getFileInfo(const gchar *uri);
 void controller_freeFileInfo(FileInfo *status);
 
+void controller_commitChanges();
+void controller_discardChanges();
 
 // These functions must be provided by the view
 void view_showDirectory(const gchar *path);
 void view_updateFileState(const gchar *path, const gchar *uri);
+void view_setUncommited(gboolean uncommitted);
 
 void view_showDocument(const gchar *fileURL,
                        const gchar *uri, const gchar *html,
                        gboolean wholePageEditable);
 gchar *view_getDocumentHTML();
 gchar *view_getDocumentFilename();
+
+gboolean view_askCommit(gchar **message);
+gboolean view_askDiscard();
 
 void view_quit();
 
