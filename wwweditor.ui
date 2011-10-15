@@ -60,6 +60,7 @@
         <child>
           <object class="GtkAction" id="OpenProject">
             <property name="label" translatable="yes">_Open project...</property>
+            <property name="stock_id">gtk-open</property>
           </object>
         </child>
         <child>
@@ -98,6 +99,12 @@
           <menuitem action="About" />
         </menu>
       </menubar>
+      <toolbar name="toolbar1">
+        <toolitem action="OpenProject" />
+        <separator />
+        <toolitem action="NewPage" />
+        <toolitem action="SavePage" />
+      </toolbar>
     </ui>
   </object>
   <object class="GtkWindow" id="main_window">
@@ -114,7 +121,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkToolbar" id="toolbar1">
+          <object class="GtkToolbar" id="toolbar1" constructor="uiman">
             <property name="visible">True</property>
           </object>
           <packing>
