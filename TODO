@@ -27,6 +27,8 @@ Projects:
           all .html (and image/stylesheet/javascript/related) files
   [X] Populating the file list
   [ ] Adding/removing files
+      [ ] Detect deleted files (use "git status -u all" instead of just
+          listing directories).
   [X] Template editing. Make <body> an implicitly editable section?
   [ ] Load subdirectories on demand
 
